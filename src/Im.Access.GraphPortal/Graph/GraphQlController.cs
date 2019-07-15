@@ -68,7 +68,7 @@ namespace Im.Access.GraphPortal.Graph
                 .ExecuteAsync(executionOptions)
                 .ConfigureAwait(true);
 
-            //result.EnrichWithApolloTracing(startTime);
+            result.EnrichWithApolloTracing(startTime);
 
             return result.Errors?.Count > 0 ? (IActionResult) BadRequest(result) : Json(result);
         }

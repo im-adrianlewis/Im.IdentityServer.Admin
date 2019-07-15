@@ -25,6 +25,11 @@ namespace Im.Access.GraphPortal.Graph.Queries
                     tenantType.TenantId = fieldResolver.GetArgument<string>("tenantId");
                     return tenantType;
                 });
+
+            Field<MeType>(
+                "me",
+                "Access to information for the current caller.",
+                resolve: _ => new { });
         }
     }
 }
