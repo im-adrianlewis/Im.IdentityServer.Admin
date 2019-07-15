@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "outDir": "dist",
+    "target": "es2017",
+    "typeRoots": [
+      "./node_modules/@types",
+      "./server/@types"
+    ],
+    "lib": [
+      "es2017"
+    ]
+  },
+  "include": ["server/**/*.ts"]
+}
