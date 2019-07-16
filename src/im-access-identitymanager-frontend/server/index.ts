@@ -8,7 +8,7 @@ import hsts from 'hsts';
 import express from 'express';
 import session from 'express-session';
 import passport from 'passport';
-import { Strategy, VerifyCallback } from 'passport-openidconnect';
+import { Strategy, VerifyCallback, Client } from 'passport-openidconnect';
 import crypto from 'crypto';
 
 // Load environment variables from .env
@@ -56,11 +56,11 @@ nextApp
         skipUserProfile: false,
         sessionKey: 'idtymgr:oidc',
         resolver: new AuthorityResolver(process.env.IDENTITY_URL || ''),
-        getClientCallback: (iss: string, cb: (err: any, client: any) => void) => {
+        getClientCallback: (iss: string, cb: (err: any, client: Client) => void) => {
           console.log(`Building OpenIdConnect client configuration for [${iss}]`);
           cb(null, {
-            id: process.env.IDENTITY_CLIENT_ID,
-            secret: process.env.IDENTITY_CLIENT_SECRET,
+            id: process.env.IDENTITY_CLIENT_ID || '',
+            secret: process.env.IDENTITY_CLIENT_SECRET || '',
             redirectURIs: [`${SERVER_URL}/auth/signin/callback`]
           });
         } 

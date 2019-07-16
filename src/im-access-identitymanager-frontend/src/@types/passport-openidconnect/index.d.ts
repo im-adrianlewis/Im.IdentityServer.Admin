@@ -62,6 +62,11 @@ declare module 'passport-openidconnect' {
         IStateStoreNoMeta |
         IStateStoreWithMeta;
 
+    export interface Client {
+        id: string;
+        secret: string;
+        redirectURIs?: string[];
+    }
     export interface OpenIdConnectStrategyOptions {
         identifierField: string | undefined;
         scope: string;
@@ -73,21 +78,23 @@ declare module 'passport-openidconnect' {
         tokenURL: string | undefined;
         store: IStateStore;
         resolver: IAuthorityResolver | undefined;
-        getClientCallback: (issuer: string, cb: ErrorOrResult<any>) => void;
+        getClientCallback: (issuer: string, cb: ErrorOrResult<Client>) => void;
     }
 
     export interface AuthorityConfiguration {
-        callbackURL: string | undefined;
-        clientID: string;
-        max_age: number | undefined;
-        ui_locals: string | undefined;
-        id_token_hint: string | undefined;
-        login_hint: string | undefined;
-        acr_values: string | undefined;
-        display: string | undefined;
-        prompt: string | undefined;
-        nonce: boolean | number | string | undefined;
-        authorizationURL
+        callbackURL?: string | undefined;
+        clientID?: string | undefined;
+        clientSecret?: string | undefined;
+        authorizationURL?: string | undefined;
+        redirectURIs?: string[];
+        max_age?: number | undefined;
+        ui_locals?: string | undefined;
+        id_token_hint?: string | undefined;
+        login_hint?: string | undefined;
+        acr_values?: string | undefined;
+        display?: string | undefined;
+        prompt?: string | undefined;
+        nonce?: boolean | number | string | undefined;
     }
 
     export function ConfigureCallback(identifier: string, done: ErrorOrComplete<AuthorityConfiguration>): void;
