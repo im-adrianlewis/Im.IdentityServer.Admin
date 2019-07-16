@@ -1,12 +1,12 @@
 import * as React from 'react';
-import Document, { Head, Main, NextScript } from 'next/document';
+import Document, { Head, Main, NextScript, DocumentContext } from 'next/document';
 
 export default class extends Document {
-  static async getInitialProps(context) {
+  static async getInitialProps(context: DocumentContext) {
     const documentProps = await Document.getInitialProps(context);
-    //const page = context.renderPage();
+    const page = context.renderPage();
 
-    return {...documentProps/*, ...page*/};
+    return {...documentProps, ...page};
   }
 
   public render() {

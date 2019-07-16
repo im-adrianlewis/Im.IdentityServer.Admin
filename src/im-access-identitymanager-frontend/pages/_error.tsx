@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { withRouter } from 'next/router';
 import { WithRouterProps } from 'next/dist/client/with-router';
 import { Container } from 'reactstrap';
+import { NextPageContext } from 'next';
 //import Styles from '../css/index.scss';
 
 interface ErrorPageProps extends WithRouterProps {
@@ -11,8 +12,12 @@ interface ErrorPageProps extends WithRouterProps {
 }
 
 class ErrorPage extends React.Component<ErrorPageProps> {
-  static getInitialProps({res, xhr}) {
-    const errorCode = res ? res.statusCode : (xhr ? xhr.status : null);
+  static getInitialProps(context: NextPageContext) {
+    const errorCode = 
+      context.res 
+      ? context.res.statusCode 
+      : (context.err ? context.err.statusCode : null);
+      
     return {
       errorCode
     };

@@ -4,13 +4,17 @@
     "module": "commonjs",
     "outDir": "dist",
     "target": "es2017",
-    "typeRoots": [
-      "./node_modules/@types",
-      "./server/@types"
-    ],
-    "lib": [
-      "es2017"
-    ]
+    "isolatedModules": false,
+    "noEmit": false
   },
-  "include": ["server/**/*.ts"]
+  "exclude": [
+    "dist",
+    ".next",
+    "out",
+    "next.config.js",
+    "node_modules"
+  ],
+  "include": [
+    "server/**/*.ts"
+  ]
 }

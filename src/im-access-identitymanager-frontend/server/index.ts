@@ -8,14 +8,14 @@ import hsts from 'hsts';
 import express from 'express';
 import session from 'express-session';
 import passport from 'passport';
-import { Strategy } from 'passport-openidconnect';
+import { Strategy, VerifyCallback } from 'passport-openidconnect';
 import crypto from 'crypto';
 
 // Load environment variables from .env
 dotenv.config();
 const isSecure = (SERVER_PORT_HTTPS > 0 &&
   process.env.SSL_CERT_PFXFILE &&
-  process.env.SSL_CERT_PASSPHRASE);
+  process.env.SSL_CERT_PASSPHRASE) ? true : false;
 
 class AuthorityResolver {
   constructor(issuer: string) {
@@ -48,47 +48,49 @@ process.on('unhandledRejection', (reason, p) => {
 nextApp
   .prepare()
   .then(() => {
-    var openIdConnectStrategy = new Strategy({
-      identifierField: 'name_identifier',
-      passReqToCallback: true,
-      scope: 'profile',
-      skipUserProfile: false,
-      sessionKey: 'idtymgr:oidc',
-      resolver: new AuthorityResolver(process.env.IDENTITY_URL),
-      getClientCallback: (iss, cb: (err: any, client: any) => void) => {
-        console.log(`Building OpenIdConnect client configuration for [${iss}]`);
-        cb(null, {
-          id: process.env.IDENTITY_CLIENT_ID,
-          secret: process.env.IDENTITY_CLIENT_SECRET,
-          redirectURIs: [`${SERVER_URL}/auth/signin/callback`]
-        });
-      }
-    }, (req, issuer, sub, profile, jwtClaims, accessToken, refreshToken, params, verified) => {
-      try {
-        console.log(`OIDC verification: [${req}, ${issuer}, ${params}]`);
+    var openIdConnectStrategy =
+      new Strategy({
+        identifierField: 'name_identifier',
+        passReqToCallback: true,
+        scope: 'profile',
+        skipUserProfile: false,
+        sessionKey: 'idtymgr:oidc',
+        resolver: new AuthorityResolver(process.env.IDENTITY_URL || ''),
+        getClientCallback: (iss: string, cb: (err: any, client: any) => void) => {
+          console.log(`Building OpenIdConnect client configuration for [${iss}]`);
+          cb(null, {
+            id: process.env.IDENTITY_CLIENT_ID,
+            secret: process.env.IDENTITY_CLIENT_SECRET,
+            redirectURIs: [`${SERVER_URL}/auth/signin/callback`]
+          });
+        } 
+      },
+      (req: express.Request, issuer: string, sub: string, profile: any, jwtClaims: any, accessToken: string, refreshToken: string, params: any, verified: VerifyCallback) => {
+        try {
+          console.log(`OIDC verification: [${req}, ${issuer}, ${params}]`);
 
-        let user = {
-          id: sub,
-          displayName: profile.displayName,
-          email: profile._raw.email,
-          emailVerified: profile._raw.email_verified
-        };
+          let user = {
+            id: sub,
+            displayName: profile.displayName,
+            email: profile._raw.email,
+            emailVerified: profile._raw.email_verified
+          };
 
-        const now = Date.now();
+          const now = Date.now();
 
-        let info = {
-          accessToken,
-          refreshToken,
-          expiryAfter: jwtClaims.exp,
-          refreshAfter: now + (jwtClaims.exp - now) / 2
-        };
+          let info = {
+            accessToken,
+            refreshToken,
+            expiryAfter: jwtClaims.exp,
+            refreshAfter: now + (jwtClaims.exp - now) / 2
+          };
 
-        verified(null, user, info);
-      }
-      catch(err) {
-        verified(err);
-      }
-    });
+          verified(null, user, info);
+        }
+        catch(err) {
+          verified(err);
+        }
+      });
 
     console.log(`Preparing to start server [HTTP: ${SERVER_PORT_HTTP}, HTTPS: ${SERVER_PORT_HTTPS}]`);
 
@@ -96,8 +98,9 @@ nextApp
     // then load cert and setup HTTP -> HTTPS redirection
     //  using second express instance
     if (SERVER_PORT_HTTPS > 0) {
-      const unsecureExpress = require('express');
-      const unsecureApp = unsecureExpress();
+      //const unsecureExpress = require('express');
+      //const unsecureApp = unsecureExpress();
+      const unsecureApp = express();
       unsecureApp.use((req, res, next) => {
         if (req.secure) {
           next();
@@ -131,8 +134,7 @@ nextApp
         const userData = new Buffer(JSON.stringify(user)).toString('base64');
         const userHash = getHash(userData);
         done(null, `${userData}:${userHash}`);
-      }
-    );
+      });
     passport.deserializeUser(
       (cookieData: string, done: (err: any, user: any) => void) => {
         if (!cookieData || cookieData.length === 0) {
@@ -168,7 +170,7 @@ nextApp
       name: '.idtymanager.auth',
       resave: true,
       saveUninitialized: true,
-      secret: process.env.COOKIE_SECRET
+      secret: process.env.COOKIE_SECRET || ''
     }));
 
     passport.use(openIdConnectStrategy);
@@ -207,10 +209,10 @@ nextApp
 
       https
         .createServer({
-          pfx: fs.readFileSync(process.env.SSL_CERT_PFXFILE),
+          pfx: fs.readFileSync(process.env.SSL_CERT_PFXFILE || ''),
           passphrase: process.env.SSL_CERT_PASSPHRASE  
         }, expressApp)
-        .listen(SERVER_PORT_HTTPS, err => {
+        .listen(SERVER_PORT_HTTPS, (err: any) => {
           if (err) {
             throw err;
           }
@@ -218,13 +220,14 @@ nextApp
           console.log(`> Ready on https://localhost:${SERVER_PORT_HTTPS} [${DEV ? 'development' : 'production'}]`);
         });
     } else {
-      expressApp.listen(SERVER_PORT_HTTP, err => {
-        if (err) {
-          throw err;
-        }
-        
-        console.log(`> Ready on http://localhost:${SERVER_PORT_HTTP} [${DEV ? 'development' : 'production'}]`);
-      });
+      expressApp
+        .listen(SERVER_PORT_HTTP, (err: any) => {
+          if (err) {
+            throw err;
+          }
+          
+          console.log(`> Ready on http://localhost:${SERVER_PORT_HTTP} [${DEV ? 'development' : 'production'}]`);
+        });
     }
   })
   .catch(err => {
