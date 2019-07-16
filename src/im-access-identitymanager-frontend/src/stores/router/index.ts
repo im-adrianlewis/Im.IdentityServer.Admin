@@ -1,10 +1,12 @@
 import Router from 'next/router';
 
-export function addRouteCompleteEvent(fx: (url: string) => void) {
+export type RouteCompleteHandler = (url: string) => void;
+
+export function addRouteCompleteEvent(fx: RouteCompleteHandler) {
   onRouteCompleteEvents.push(fx);
 }
 
-const onRouteCompleteEvents = [];
+const onRouteCompleteEvents = new Array<RouteCompleteHandler>();
 
 Router.events.on('routeChangeComplete', (url) => {
   onRouteCompleteEvents.forEach(fx => fx(url));

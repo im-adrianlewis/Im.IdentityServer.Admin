@@ -2,7 +2,7 @@ import { Reducer } from 'redux';
 import { ConversationState, ConversationActionTypes } from './types';
 
 const initialState: ConversationState = {
-  id: undefined,
+  id: '',
   data: undefined,
   error: undefined,
   loading: false

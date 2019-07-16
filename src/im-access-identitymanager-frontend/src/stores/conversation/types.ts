@@ -45,8 +45,8 @@ export enum ConversationActionTypes {
 // };
 
 export interface ConversationState {
-  readonly id: string;
+  readonly id?: string;
   readonly loading: boolean;
-  readonly data: Conversation;
+  readonly data?: Conversation;
   readonly error?: string;
 }

@@ -1,18 +1,18 @@
 export function cleanObject(object: object, valueKeeper?: any) {
   return Object
     .entries(object)
-    .reduce((ret, [key, value]) => {
+    .reduce((ret: any, [key, value]) => {
       if (value === undefined || value === null) {
         if (typeof valueKeeper !== 'undefined') {
-          ret[key] = valueKeeper
+          ret[key] = valueKeeper;
         }
-        return ret
+        return ret;
       }
       if (!Array.isArray(value) && typeof value === 'object') {
-        ret[key] = cleanObject(value)
+        ret[key] = cleanObject(value);
       } else {
-        ret[key] = value
+        ret[key] = value;
       }
-      return ret
-    }, {})
+      return ret;
+    }, {});
 }

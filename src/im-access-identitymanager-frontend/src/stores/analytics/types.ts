@@ -4,7 +4,7 @@ export const AnalyticsActionTypes = {
   ANALYTICS_SKIPPED: '@@Analytics/SKIPPED'
 };
 
-export class AnalyticsState {
+export interface AnalyticsState {
   initialising: boolean;
   initialised: boolean;
   skipped: boolean;

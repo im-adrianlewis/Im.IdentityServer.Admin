@@ -4,7 +4,7 @@ import { NextPageContext } from 'next';
 
 export class PageProps {
   //session: INextAuthSessionData;
-  lang: string;
+  lang?: string;
 }
 
 export class Page<P = PageProps, S = {}, SS = any> extends React.Component<P, S, SS> {
