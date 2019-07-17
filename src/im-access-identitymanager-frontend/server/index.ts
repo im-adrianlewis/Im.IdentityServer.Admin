@@ -8,7 +8,7 @@ import hsts from 'hsts';
 import express from 'express';
 import session from 'express-session';
 import passport from 'passport';
-import { Strategy, VerifyCallback, Client } from 'passport-openidconnect';
+import { Issuer, TokenSet, Strategy, VerifyCallback } from 'openid-client';
 import crypto from 'crypto';
 
 // Load environment variables from .env
@@ -16,19 +16,6 @@ dotenv.config();
 const isSecure = (SERVER_PORT_HTTPS > 0 &&
   process.env.SSL_CERT_PFXFILE &&
   process.env.SSL_CERT_PASSPHRASE) ? true : false;
-
-class AuthorityResolver {
-  constructor(issuer: string) {
-    this._issuer = issuer;
-  }
-
-  public resolve(identifier: string, done: (err: any, issuer: string) => void) {
-    console.log(`AuthorityResolver: [${identifier}]`);
-    done(null, this._issuer);
-  }
-
-  private _issuer: string;
-}
 
 // Initialize Next.js
 const nextApp = next({
@@ -47,48 +34,46 @@ process.on('unhandledRejection', (reason, p) => {
 // Add next-auth to next app
 nextApp
   .prepare()
-  .then(() => {
+  .then(async () => {
+    const issuer = await Issuer.discover(`${process.env.IDENTITY_URL}/.well-known/openid-configuration`);
+    const client = new issuer.Client();
     var openIdConnectStrategy =
       new Strategy({
-        identifierField: 'name_identifier',
-        passReqToCallback: true,
-        scope: 'profile',
-        skipUserProfile: false,
+        client: client,
+        params: {
+          client_id: 'ImAccessGraph',
+          redirect_uri: `${SERVER_URL}/auth/signin/callback`,
+          response_type: 'code id_token token',
+          response_mode: 'form_post',
+          acr_values: 'tenant:RadioTimes',
+          scope: 'openid profile',
+          prompt: 'login'
+        },
+        passReqToCallback: false,
         sessionKey: 'idtymgr:oidc',
-        resolver: new AuthorityResolver(process.env.IDENTITY_URL || ''),
-        getClientCallback: (iss: string, cb: (err: any, client: Client) => void) => {
-          console.log(`Building OpenIdConnect client configuration for [${iss}]`);
-          cb(null, {
-            id: process.env.IDENTITY_CLIENT_ID || '',
-            secret: process.env.IDENTITY_CLIENT_SECRET || '',
-            redirectURIs: [`${SERVER_URL}/auth/signin/callback`]
-          });
-        } 
+        usePKCE: false
       },
-      (req: express.Request, issuer: string, sub: string, profile: any, jwtClaims: any, accessToken: string, refreshToken: string, params: any, verified: VerifyCallback) => {
+      (userInfo: any, tokenSet: TokenSet, verified: VerifyCallback) => {
         try {
-          console.log(`OIDC verification: [${req}, ${issuer}, ${params}]`);
+          console.log(`OIDC verification phase`);
 
           let user = {
-            id: sub,
-            displayName: profile.displayName,
-            email: profile._raw.email,
-            emailVerified: profile._raw.email_verified
+            id: userInfo.sub,
+            displayName: userInfo.displayName,
+            email: userInfo.email,
+            emailVerified: userInfo.email_verified
           };
 
-          const now = Date.now();
-
           let info = {
-            accessToken,
-            refreshToken,
-            expiryAfter: jwtClaims.exp,
-            refreshAfter: now + (jwtClaims.exp - now) / 2
+            accessToken: tokenSet.access_token,
+            refreshToken: tokenSet.refresh_token,
+            idToken: tokenSet.id_token
           };
 
           verified(null, user, info);
         }
         catch(err) {
-          verified(err);
+          verified(err, null);
         }
       });
 
@@ -173,7 +158,7 @@ nextApp
       secret: process.env.COOKIE_SECRET || ''
     }));
 
-    passport.use(openIdConnectStrategy);
+    passport.use('openidconnect', openIdConnectStrategy);
     expressApp.use(passport.initialize());
     expressApp.use(passport.session());
     expressApp.get('/auth/signin', passport.authenticate('openidconnect'));
