@@ -1,6 +1,6 @@
 import next from 'next';
 import { DEV, SERVER_HOST, SERVER_URL, SERVER_PORT_HTTP, SERVER_PORT_HTTPS } from '../src/constants/env';
-import fs, { createReadStream } from 'fs';
+import { createReadStream, readFileSync } from 'fs';
 import http from 'http';
 import https from 'https';
 import hsts from 'hsts';
@@ -9,12 +9,7 @@ import session from 'express-session';
 import passport from 'passport';
 import { Issuer, TokenSet, Strategy, VerifyCallback } from 'openid-client';
 import crypto from 'crypto';
-
-const tenants = [
-  'Immediate',
-  'RadioTimes',
-  'GardenersWorld'
-];
+import tenants from '../src/constants/tenants';
 
 function createPassportStrategies(passport: passport.PassportStatic, tenants: string[], client: any) {
   tenants.forEach(tenant => {
@@ -27,7 +22,7 @@ function createPassportStrategies(passport: passport.PassportStatic, tenants: st
           //response_type: 'code id_token token',
           response_type: 'code',
           response_mode: 'form_post',
-          acr_values: 'tenant:RadioTimes',
+          acr_values: `tenant:${tenant}`,
           scope: 'openid profile',
           prompt: 'login'
         },
@@ -99,9 +94,8 @@ nextApp
 
     console.log(`Preparing to start server [HTTP: ${SERVER_PORT_HTTP}, HTTPS: ${SERVER_PORT_HTTPS}]`);
 
-    // TODO: If we have secure credentials for HTTPS
-    // then load cert and setup HTTP -> HTTPS redirection
-    //  using second express instance
+    // If we have secure credentials for HTTPS then load cert and setup
+    //  HTTP -> HTTPS redirection using second express instance
     if (SERVER_PORT_HTTPS > 0) {
       const unsecureApp = express();
       unsecureApp.use((req, res, next) => {
@@ -181,7 +175,9 @@ nextApp
     expressApp.use(passport.session());
     createSignInAuthenticate(expressApp, passport, tenants);
     expressApp.get('/auth/signin/callback',
-      passport.authenticate('OpenIdConnectImmediate', {failureRedirect: '/'}),
+      passport.authenticate(
+        tenants.map(t => `OpenIdConect${t}`),
+        { failureRedirect: '/' }),
       (_/*req*/, res) => {
         res.redirect('/');
       });
@@ -212,7 +208,7 @@ nextApp
 
       https
         .createServer({
-          pfx: fs.readFileSync(process.env.SSL_CERT_PFXFILE || ''),
+          pfx: readFileSync(process.env.SSL_CERT_PFXFILE || ''),
           passphrase: process.env.SSL_CERT_PASSPHRASE  
         }, expressApp)
         .addListener('error', (error: Error) => {

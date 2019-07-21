@@ -36,22 +36,27 @@ export class MainMenu extends React.Component<MainMenuProps, MainMenuState> {
           <Nav className="ml-auto" navbar cssModule={css}>
             <NavItem cssModule={css}>
               <Link href="/">
-                <NavLink href="/">Home</NavLink>
+                <NavLink cssModule={css} href="/">Home</NavLink>
               </Link>
             </NavItem>
             <NavItem cssModule={css}>
               <Link href="/SSR">
-                <NavLink href="/SSR">SSR</NavLink>
+                <NavLink cssModule={css} href="/SSR">SSR</NavLink>
               </Link>
             </NavItem>
             <NavItem cssModule={css}>
               <Link href="/StyledJsx">
-                <NavLink href="/StyledJsx">Styled Jsx</NavLink>
+                <NavLink cssModule={css} href="/StyledJsx">Styled Jsx</NavLink>
               </Link>
             </NavItem>
             <NavItem cssModule={css}>
               <Link href="/ModuleCss">
-                <NavLink href="/ModuleCss">Module CSS</NavLink>
+                <NavLink cssModule={css} href="/ModuleCss">Module CSS</NavLink>
+              </Link>
+            </NavItem>
+            <NavItem cssModule={css}>
+              <Link href="/auth/signin">
+                <NavLink cssModule={css} href="/auth/signin">Sign In</NavLink>
               </Link>
             </NavItem>
           </Nav>
