@@ -4,8 +4,8 @@ import { Provider } from 'react-redux';
 import App, { Container/*, AppContext*/ } from 'next/app';
 import makeStore from '../src/makeStore';
 import withRedux from 'next-redux-wrapper';
-import NextSeo from 'next-seo';
-import SEO from '../next-seo.config';
+// import NextSeo from 'next-seo';
+// import SEO from '../next-seo.config';
 
 interface IdentityManagerAppProps {
   store?: any;
@@ -28,7 +28,7 @@ class IdentityManagerApp extends App<IdentityManagerAppProps> {
     return (
       <Container>
         <Provider store={store}>
-          <NextSeo config={SEO} />
+          {/* <NextSeo /> */}
           <Component {...pageProps} />
         </Provider>
       </Container>

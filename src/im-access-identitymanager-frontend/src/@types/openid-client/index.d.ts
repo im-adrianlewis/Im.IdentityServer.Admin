@@ -134,6 +134,7 @@ declare module 'openid-client' {
         readonly token_type?: string;
         readonly id_token?: string;
         readonly refresh_token?: string;
+        readonly expires_in?: number;
     
         expired(): boolean;
     
@@ -164,21 +165,15 @@ declare module 'openid-client' {
 
     type VerifyCallbackError = (err: any) => void;
     type VerifyCallbackSuccess = (err: any, user: any, info?: any) => void;
-    export type VerifyCallback =
-        VerifyCallbackError |
-        VerifyCallbackSuccess;
+    export type VerifyCallback = VerifyCallbackError | VerifyCallbackSuccess;
 
     type VerifyReqAction = (req: Request, tokenSet: TokenSet, verified: VerifyCallback) => void;
     type VerifyReqProfileAction = (req: Request, userInfo: any, tokenSet: TokenSet, verified: VerifyCallback) => void;
-    export type VerifyReqFunction =
-        VerifyReqAction | 
-        VerifyReqProfileAction;
+    export type VerifyReqFunction = VerifyReqAction | VerifyReqProfileAction;
 
     type VerifyAction = (tokenSet: TokenSet, verified: VerifyCallback) => void;
     type VerifyProfileAction = (userInfo: any, tokenSet: TokenSet, verified: VerifyCallback) => void;
-    export type VerifyFunction =
-        VerifyAction | 
-        VerifyProfileAction;
+    export type VerifyFunction = VerifyAction | VerifyProfileAction;
 
     export class Strategy extends passport.Strategy {
         constructor(options: IStrategyOptions, verify: VerifyFunction | VerifyReqFunction);

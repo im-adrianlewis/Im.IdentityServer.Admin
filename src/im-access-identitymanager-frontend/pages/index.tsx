@@ -3,7 +3,7 @@ import { Container, Jumbotron } from 'reactstrap';
 import { Home } from '../src/components/Home';
 import { Layout } from '../src/components/Layout';
 import { Page } from '../src/components/Page';
-import NextSeo from 'next-seo';
+// import NextSeo from 'next-seo';
 
 export default class extends Page {
   public componentDidMount() {
@@ -24,10 +24,10 @@ export default class extends Page {
   public render() {
     return (
       <Layout {...this.props} showNavMenu={true}>
-        <NextSeo config={{
+        {/* <NextSeo config={{
           title: 'Home',
           description: 'Identity Manager'
-        }} />
+        }} /> */}
         <Jumbotron className="text-light rounded-0" style={{
           backgroundColor: 'rgba(73,155,234,1)',
           background: 'radial-gradient(ellipse at center, rgba(73,155,234,1) 0%, rgba(32,124,229,1) 100%)',

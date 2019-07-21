@@ -1,7 +1,5 @@
-import dotenv from 'dotenv';
-dotenv.config();
-
 export const DEV = process.env.NODE_ENV !== 'production';
+export const BUILD_ID = process.env.BUILD_ID;
 export const GA_TRACKING_ID = process.env.GA_TRACKING_ID;
 export const GRAPHQL_ENDPOINT = process.env.GRAPHQL_URL;
 export const SERVER_HOST = process.env.SERVER_HOST;

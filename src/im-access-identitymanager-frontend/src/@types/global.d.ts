@@ -23,3 +23,7 @@ declare module '*.json' {
   const resource: any
   export = resource
 }
+declare module '*.scss' {
+  const content: {[className: string]: string};
+  export = content;
+}

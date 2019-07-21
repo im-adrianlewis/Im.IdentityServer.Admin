@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "Launch Program",
             "args": ["server/index.ts"],
-            "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+            "runtimeArgs": ["--nolazy", "-r", "dotenv/config", "-r", "ts-node/register"],
             "env": { "TS_NODE_PROJECT": "tsconfig.server.json" },
             "sourceMaps": true,
             "cwd": "${workspaceFolder}",

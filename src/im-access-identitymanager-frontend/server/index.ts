@@ -1,5 +1,4 @@
 import next from 'next';
-import dotenv from 'dotenv';
 import { DEV, SERVER_HOST, SERVER_URL, SERVER_PORT_HTTP, SERVER_PORT_HTTPS } from '../src/constants/env';
 import fs, { createReadStream } from 'fs';
 import http from 'http';
@@ -11,39 +10,22 @@ import passport from 'passport';
 import { Issuer, TokenSet, Strategy, VerifyCallback } from 'openid-client';
 import crypto from 'crypto';
 
-// Load environment variables from .env
-dotenv.config();
-const isSecure = (SERVER_PORT_HTTPS > 0 &&
-  process.env.SSL_CERT_PFXFILE &&
-  process.env.SSL_CERT_PASSPHRASE) ? true : false;
+const tenants = [
+  'Immediate',
+  'RadioTimes',
+  'GardenersWorld'
+];
 
-// Initialize Next.js
-const nextApp = next({
-  dir: '.',
-  dev: DEV
-});
-
-process.on('uncaughtException', function(err) {
-  console.error('Uncaught Exception: ', err);
-});
-
-process.on('unhandledRejection', (reason, p) => {
-  console.error('Unhandled Rejection: Promise:', p, 'Reason:', reason);
-});
-
-// Add next-auth to next app
-nextApp
-  .prepare()
-  .then(async () => {
-    const issuer = await Issuer.discover(`${process.env.IDENTITY_URL}/.well-known/openid-configuration`);
-    const client = new issuer.Client();
+function createPassportStrategies(passport: passport.PassportStatic, tenants: string[], client: any) {
+  tenants.forEach(tenant => {
     var openIdConnectStrategy =
       new Strategy({
         client: client,
         params: {
           client_id: 'ImAccessGraph',
           redirect_uri: `${SERVER_URL}/auth/signin/callback`,
-          response_type: 'code id_token token',
+          //response_type: 'code id_token token',
+          response_type: 'code',
           response_mode: 'form_post',
           acr_values: 'tenant:RadioTimes',
           scope: 'openid profile',
@@ -77,14 +59,50 @@ nextApp
         }
       });
 
+      passport.use(`OpenIdConnect${tenant}`, openIdConnectStrategy);
+  });
+}
+
+function createSignInAuthenticate(expressApp: express.Express, passport: passport.PassportStatic, tenants: string[]) {
+  tenants.forEach(tenant => {
+    expressApp.get(
+      `/auth/signin/${tenant.toLowerCase()}`,
+      passport.authenticate(`OpenIdConnect${tenant}`));
+  });
+}
+
+// Load environment variables from .env
+const isSecure = (SERVER_PORT_HTTPS > 0 &&
+  process.env.SSL_CERT_PFXFILE &&
+  process.env.SSL_CERT_PASSPHRASE) ? true : false;
+
+// Initialize Next.js
+const nextApp = next({
+  dir: '.',
+  dev: DEV
+});
+
+process.on('uncaughtException', function(err) {
+  console.error('Uncaught Exception: ', err);
+});
+
+process.on('unhandledRejection', (reason, p) => {
+  console.error('Unhandled Rejection: Promise:', p, 'Reason:', reason);
+});
+
+// Add next-auth to next app
+nextApp
+  .prepare()
+  .then(async () => {
+    const issuer = await Issuer.discover(`${process.env.IDENTITY_URL}/.well-known/openid-configuration`);
+    const client = new issuer.Client();
+
     console.log(`Preparing to start server [HTTP: ${SERVER_PORT_HTTP}, HTTPS: ${SERVER_PORT_HTTPS}]`);
 
     // TODO: If we have secure credentials for HTTPS
     // then load cert and setup HTTP -> HTTPS redirection
     //  using second express instance
     if (SERVER_PORT_HTTPS > 0) {
-      //const unsecureExpress = require('express');
-      //const unsecureApp = unsecureExpress();
       const unsecureApp = express();
       unsecureApp.use((req, res, next) => {
         if (req.secure) {
@@ -158,12 +176,12 @@ nextApp
       secret: process.env.COOKIE_SECRET || ''
     }));
 
-    passport.use('openidconnect', openIdConnectStrategy);
+    createPassportStrategies(passport, tenants, client);
     expressApp.use(passport.initialize());
     expressApp.use(passport.session());
-    expressApp.get('/auth/signin', passport.authenticate('openidconnect'));
+    createSignInAuthenticate(expressApp, passport, tenants);
     expressApp.get('/auth/signin/callback',
-      passport.authenticate('openidconnect', {failureRedirect: '/'}),
+      passport.authenticate('OpenIdConnectImmediate', {failureRedirect: '/'}),
       (_/*req*/, res) => {
         res.redirect('/');
       });
@@ -197,11 +215,12 @@ nextApp
           pfx: fs.readFileSync(process.env.SSL_CERT_PFXFILE || ''),
           passphrase: process.env.SSL_CERT_PASSPHRASE  
         }, expressApp)
-        .listen(SERVER_PORT_HTTPS, (err: any) => {
-          if (err) {
-            throw err;
+        .addListener('error', (error: Error) => {
+          if (error) {
+            throw error;
           }
-          
+        })
+        .listen(SERVER_PORT_HTTPS, () => {
           console.log(`> Ready on https://localhost:${SERVER_PORT_HTTPS} [${DEV ? 'development' : 'production'}]`);
         });
     } else {

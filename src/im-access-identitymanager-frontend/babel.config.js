@@ -6,9 +6,16 @@ module.exports = (api) => {
       'next/babel'
     ],
     plugins: [
-      ['transform-define', {
-        'process.env.NODE_ENV': process.env.NODE_ENV
-      }]
+      [
+        'transform-define',
+        {
+          'process.env.NODE_ENV': process.env.NODE_ENV
+        },
+        // "react-css-modules",
+        // {
+        
+        // }
+      ]
     ]
   };
 };
