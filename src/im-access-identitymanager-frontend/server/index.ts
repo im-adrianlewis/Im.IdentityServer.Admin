@@ -19,8 +19,8 @@ function createPassportStrategies(passport: passport.PassportStatic, tenants: st
         params: {
           client_id: 'ImAccessGraph',
           redirect_uri: `${SERVER_URL}/auth/signin/callback`,
-          //response_type: 'code id_token token',
-          response_type: 'code',
+          response_type: 'code id_token token',
+          //response_type: 'code',
           response_mode: 'form_post',
           acr_values: `tenant:${tenant}`,
           scope: 'openid profile',
