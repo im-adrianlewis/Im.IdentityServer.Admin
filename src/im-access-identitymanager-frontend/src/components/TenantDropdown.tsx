@@ -4,6 +4,7 @@ import tenants from '../constants/tenants';
 import css from '../../css/index.scss';
 
 interface TenantDropdownProps {
+  id?: string | undefined;
   defaultTenant?: string;
   availableTenants?: string[];
 
@@ -40,11 +41,13 @@ class TenantDropdown extends react.Component<TenantDropdownProps, TenantDropdown
         </DropdownItem>
       ));
 
+    var toggleMessage = this.state.selectedTenant !== null
+      ? `Brand: ${this.state.selectedTenant}`
+      : 'Select brand';
+
     return (
-      <Dropdown cssModule={css} isOpen={this.state.dropdownOpen} toggle={this.toggle.bind(this)} setActiveFromChild>
-        <DropdownToggle cssModule={css} caret>
-          Brand
-        </DropdownToggle>
+      <Dropdown id={this.props.id} cssModule={css} isOpen={this.state.dropdownOpen} toggle={this.toggle.bind(this)} setActiveFromChild>
+        <DropdownToggle cssModule={css} caret>{toggleMessage}</DropdownToggle>
         <DropdownMenu cssModule={css}>
           <DropdownItem cssModule={css} header>Brand</DropdownItem>
           <DropdownItem cssModule={css} 
@@ -68,6 +71,11 @@ class TenantDropdown extends react.Component<TenantDropdownProps, TenantDropdown
   }
 
   private onSelectedTenant(tenant: string): void {
+    this.setState((prevState: TenantDropdownState) => ({
+      dropdownOpen: prevState.dropdownOpen,
+      selectedTenant: tenant
+    }));
+    
     this.props.onSelectedTenant(tenant);
   }
 }
