@@ -1,6 +1,6 @@
 {
-  "short_name": "Conversations",
-  "name": "Zen Conversations",
+  "short_name": "IdentityManager",
+  "name": "IM Identity Manager",
   "icons": [
     {
       "src": "/static/images/icons-192.png",

@@ -1,7 +1,7 @@
 /// Type definitions for passport-openidconnect
 /// <reference types="passport" />
 /// <reference types="express" />
-/// <reference types="openid-client" />
+/// <reference types="http" />
 
 declare module 'openid-client' {
     import { Request } from "express";

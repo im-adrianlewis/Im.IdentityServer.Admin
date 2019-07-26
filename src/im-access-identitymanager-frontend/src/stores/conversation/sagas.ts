@@ -36,7 +36,9 @@ const clientQuery = (conversationId: string) =>
 
 function* handleFetch({payload: conversationId}: AnyAction) {
   try {
-    const result: ApolloQueryResult<ConversationResponse> = yield call(clientQuery, conversationId);
+    const result: ApolloQueryResult<ConversationResponse> =
+      yield call(clientQuery, conversationId);
+      
     if (result.errors) {
       yield put(fetchError(result.errors.join(', ')));
     }

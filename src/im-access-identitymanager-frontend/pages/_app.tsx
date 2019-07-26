@@ -1,7 +1,7 @@
 import 'isomorphic-fetch';
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import App, { Container/*, AppContext*/ } from 'next/app';
+import App, { Container, AppContext } from 'next/app';
 import makeStore from '../src/makeStore';
 import withRedux from 'next-redux-wrapper';
 // import NextSeo from 'next-seo';
@@ -12,7 +12,7 @@ interface IdentityManagerAppProps {
 }
 
 class IdentityManagerApp extends App<IdentityManagerAppProps> {
-  /*static async getInitialProps(appContext: AppContext) {
+  static async getInitialProps(appContext: AppContext) {
     let pageProps = {};
 
     if (appContext.Component.getInitialProps) {
@@ -20,7 +20,7 @@ class IdentityManagerApp extends App<IdentityManagerAppProps> {
     }
 
     return { pageProps };
-  }*/
+  }
 
   public render() {
     const { Component, pageProps, store } = this.props;
