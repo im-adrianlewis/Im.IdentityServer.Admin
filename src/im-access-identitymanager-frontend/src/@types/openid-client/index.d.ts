@@ -175,9 +175,11 @@ declare module 'openid-client' {
     type VerifyProfileAction = (userInfo: any, tokenSet: TokenSet, verified: VerifyCallback) => void;
     export type VerifyFunction = VerifyAction | VerifyProfileAction;
 
-    export class Strategy extends passport.Strategy {
+    class OpenIdConnectStrategy extends passport.Strategy {
         constructor(options: IStrategyOptions, verify: VerifyFunction | VerifyReqFunction);
 
         authenticate(req: Request, options: any);
     }
+
+    export { OpenIdConnectStrategy as Strategy };
 }

@@ -2,58 +2,56 @@ import next from 'next';
 import { DEV, SERVER_HOST, SERVER_URL, SERVER_PORT_HTTP, SERVER_PORT_HTTPS } from '../src/constants/env';
 import { createReadStream, readFileSync } from 'fs';
 import http from 'http';
+import bodyParser from 'body-parser';
 import https from 'https';
 import hsts from 'hsts';
 import express from 'express';
-import session from 'express-session';
+// import session from 'express-session';
+import cookieSession from 'cookie-session';
 import passport from 'passport';
-import { Issuer, TokenSet, Strategy, VerifyCallback } from 'openid-client';
+import { Issuer, TokenSet, VerifyCallback } from 'openid-client';
 import crypto from 'crypto';
 import tenants from '../src/constants/tenants';
+import PassportStrategyFactory from './passportStrategyFactory';
+
+process.on('uncaughtException', function(err) {
+  console.error('Uncaught Exception: ', err);
+});
+
+process.on('unhandledRejection', (reason, p) => {
+  console.error('Unhandled Rejection: Promise:', p, 'Reason:', reason);
+});
+
+const strategyFactory = new PassportStrategyFactory(SERVER_URL);
+
+function createUserProfile(userInfo: any, tokenSet: TokenSet, verified: VerifyCallback) {
+  try {
+    console.log(`OIDC verification phase`);
+
+    let user = {
+      id: userInfo.sub,
+      displayName: userInfo.displayName,
+      email: userInfo.email,
+      emailVerified: userInfo.email_verified
+    };
+
+    let info = {
+      accessToken: tokenSet.access_token,
+      refreshToken: tokenSet.refresh_token,
+      idToken: tokenSet.id_token
+    };
+
+    verified(null, user, info);
+  }
+  catch(err) {
+    verified(err, null);
+  }
+}
 
 function createPassportStrategies(passport: passport.PassportStatic, tenants: string[], client: any) {
   tenants.forEach(tenant => {
-    var openIdConnectStrategy =
-      new Strategy({
-        client: client,
-        params: {
-          client_id: 'ImAccessGraph',
-          redirect_uri: `${SERVER_URL}/auth/signin/callback`,
-          response_type: 'code id_token token',
-          response_mode: 'form_post',
-          acr_values: `tenant:${tenant}`,
-          scope: 'openid profile',
-          prompt: 'login'
-        },
-        passReqToCallback: false,
-        sessionKey: 'idtymgr:oidc',
-        usePKCE: false
-      },
-      (userInfo: any, tokenSet: TokenSet, verified: VerifyCallback) => {
-        try {
-          console.log(`OIDC verification phase`);
-
-          let user = {
-            id: userInfo.sub,
-            displayName: userInfo.displayName,
-            email: userInfo.email,
-            emailVerified: userInfo.email_verified
-          };
-
-          let info = {
-            accessToken: tokenSet.access_token,
-            refreshToken: tokenSet.refresh_token,
-            idToken: tokenSet.id_token
-          };
-
-          verified(null, user, info);
-        }
-        catch(err) {
-          verified(err, null);
-        }
-      });
-
-      passport.use(`OpenIdConnect${tenant}`, openIdConnectStrategy);
+    var openIdConnectStrategy = strategyFactory.getStrategy(tenant, client, createUserProfile);
+    passport.use(`OpenIdConnect${tenant}`, openIdConnectStrategy);
   });
 }
 
@@ -63,6 +61,12 @@ function createSignInAuthenticate(expressApp: express.Express, passport: passpor
       `/auth/signin/${tenant.toLowerCase()}`,
       passport.authenticate(`OpenIdConnect${tenant}`));
   });
+
+  expressApp.post(
+    '/auth/signin/callback',
+    tenants.map(tenant => passport.authenticate(`OpenIdConnect${tenant}`, { successRedirect: '/' })),
+    (req: express.Request, res: express.Response) => { if (req && res && req.session) res.redirect(req.session.returnTo || '/'); }
+  );
 }
 
 // Load environment variables from .env
@@ -74,14 +78,6 @@ const isSecure = (SERVER_PORT_HTTPS > 0 &&
 const nextApp = next({
   dir: '.',
   dev: DEV
-});
-
-process.on('uncaughtException', function(err) {
-  console.error('Uncaught Exception: ', err);
-});
-
-process.on('unhandledRejection', (reason, p) => {
-  console.error('Unhandled Rejection: Promise:', p, 'Reason:', reason);
 });
 
 // Add next-auth to next app
@@ -154,33 +150,7 @@ nextApp
         done(null, JSON.parse(new Buffer(userData, 'base64').toString()));
       });
 
-    expressApp.use(session({
-      cookie: {
-        domain: SERVER_HOST,
-        path: '/',
-        httpOnly: true,
-        secure: isSecure,
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-        sameSite: true
-      },
-      name: '.idtymanager.auth',
-      resave: true,
-      saveUninitialized: true,
-      secret: process.env.COOKIE_SECRET || ''
-    }));
-
-    createPassportStrategies(passport, tenants, client);
-    expressApp.use(passport.initialize());
-    expressApp.use(passport.session());
-    createSignInAuthenticate(expressApp, passport, tenants);
-    expressApp.get('/auth/signin/callback',
-      passport.authenticate(
-        tenants.map(t => `OpenIdConect${t}`),
-        { failureRedirect: '/' }),
-      (_/*req*/, res) => {
-        res.redirect('/');
-      });
-    
+    // Static resources
     // Service worker
     expressApp.get('/sw.js', (_, res) => {
       res.setHeader('content-type', 'text/javascript');
@@ -189,6 +159,28 @@ nextApp
   
     // Serve fonts from ionicons npm module
     expressApp.use('/fonts/ionicons', express.static('./node_modules/ionicons/dist/fonts'));
+    
+    // Setup express body-parser support
+    expressApp.use(bodyParser.json());
+    expressApp.use(bodyParser.urlencoded({ extended: true }));
+
+    // Setup express session middleware 
+    expressApp.use(cookieSession({
+      name: 'idtymgr_session',
+      secret: process.env.COOKIE_SECRET || '',
+      domain: SERVER_HOST,
+      path: '/',
+      httpOnly: true,
+      secure: isSecure,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      sameSite: true
+    }));
+
+    // Setup passport authentication and hook into express
+    createPassportStrategies(passport, tenants, client);
+    expressApp.use(passport.initialize());
+    expressApp.use(passport.session());
+    createSignInAuthenticate(expressApp, passport, tenants);
     
     // Catch-all handler to allow Next.js to handle all other routes
     expressApp.all('*', (req, res) => {

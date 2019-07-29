@@ -10,10 +10,14 @@
             "name": "Launch Program",
             "args": ["server/index.ts"],
             "runtimeArgs": ["--nolazy", "-r", "dotenv/config", "-r", "ts-node/register"],
-            "env": { "TS_NODE_PROJECT": "tsconfig.server.json" },
+            "env": {
+                "TS_NODE_PROJECT": "tsconfig.server.json",
+                "DEBUG": "*"
+            },
             "sourceMaps": true,
             "cwd": "${workspaceFolder}",
-            "protocol": "inspector"
+            "protocol": "inspector",
+            "console": "internalConsole"
         }
     ]
 }
