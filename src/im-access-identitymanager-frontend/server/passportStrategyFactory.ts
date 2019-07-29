@@ -26,7 +26,7 @@ export default class PassportStrategyFactory {
           prompt: 'login'
         },
         passReqToCallback: false,
-        sessionKey: 'idtymgr_session',
+        sessionKey: 'oidc:identity',
         usePKCE: false
       },
       callback);
