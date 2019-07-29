@@ -6,7 +6,7 @@ import bodyParser from 'body-parser';
 import https from 'https';
 import hsts from 'hsts';
 import express from 'express';
-// import session from 'express-session';
+import cookieParser from 'cookie-parser';
 import cookieSession from 'cookie-session';
 import passport from 'passport';
 import { Issuer, TokenSet, VerifyCallback } from 'openid-client';
@@ -160,6 +160,11 @@ nextApp
     // Serve fonts from ionicons npm module
     expressApp.use('/fonts/ionicons', express.static('./node_modules/ionicons/dist/fonts'));
     
+    // Setup express cookie-parser support
+    expressApp.use(cookieParser(
+      process.env.COOKIE_SECRET || ''
+    ));
+
     // Setup express body-parser support
     expressApp.use(bodyParser.json());
     expressApp.use(bodyParser.urlencoded({ extended: true }));

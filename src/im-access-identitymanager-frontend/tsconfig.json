@@ -20,6 +20,11 @@
     "noUnusedParameters": true,
     "isolatedModules": true,
     "removeComments": false,
+    "plugins": [
+      {
+        "name": "typescript-tslint-plugin"
+      }
+    ],
     "preserveConstEnums": true,
     "sourceMap": true,
     "forceConsistentCasingInFileNames": true,
