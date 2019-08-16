@@ -1,0 +1,18 @@
+FROM node:12
+
+# Set working directory
+WORKDIR /
+
+# Installing dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copying source files
+COPY . .
+
+# Building application
+RUN npm run build
+
+# Run the app
+EXPOSE 44370
+CMD [ "npm" "start" ]
