@@ -18,7 +18,7 @@ export default class PassportStrategyFactory {
         client: client,
         params: {
           client_id: 'ImAccessGraph',
-          redirect_uri: `${this.serverUrl}/auth/signin/callback`,
+          redirect_uri: `${this.serverUrl}/auth/signin/callback-${tenant}`,
           response_type: 'code id_token token',
           response_mode: 'form_post',
           acr_values: `tenant:${tenant}`,

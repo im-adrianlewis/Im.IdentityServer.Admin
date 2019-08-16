@@ -60,18 +60,12 @@ function createSignInAuthenticate(expressApp: express.Express, passport: passpor
     expressApp.get(
       `/auth/signin/${tenant.toLowerCase()}`,
       passport.authenticate(`OpenIdConnect${tenant}`));
-  });
 
-  tenants.forEach(tenant => {
     expressApp.post(
-      `/auth/signin/callback`,
-      passport.authenticate(`OpenIdConnect${tenant}`, { successRedirect: '/' }));
+      `/auth/signin/callback-${tenant.toLowerCase()}`,
+      passport.authenticate(`OpenIdConnect${tenant}`, { successRedirect: '/' }),
+      (req: express.Request, res: express.Response) => { if (req && res && req.session) res.redirect(req.session.returnTo || '/'); });
   });
-
-  expressApp.post(
-    '/auth/signin/callback',
-    (req: express.Request, res: express.Response) => { if (req && res && req.session) res.redirect(req.session.returnTo || '/'); }
-  );
 }
 
 // Load environment variables from .env
