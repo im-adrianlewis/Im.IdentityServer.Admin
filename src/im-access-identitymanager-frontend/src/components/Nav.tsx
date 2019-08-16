@@ -33,7 +33,7 @@ export class MainMenu extends React.Component<MainMenuProps, MainMenuState> {
         <NavbarToggler id="navbar-toggler" onClick={this.toggle} cssModule={css} />
         <NavbarBrand href="/" cssModule={css}>Identity Manager</NavbarBrand>
         <Collapse isOpen={this.state.isOpen} navbar cssModule={css}>
-          <Nav className="ml-auto" navbar cssModule={css}>
+          <Nav className="mr-auto" navbar cssModule={css}>
             <NavItem cssModule={css}>
               <Link href="/">
                 <NavLink cssModule={css} href="/">Home</NavLink>
@@ -54,6 +54,8 @@ export class MainMenu extends React.Component<MainMenuProps, MainMenuState> {
                 <NavLink cssModule={css} href="/ModuleCss">Module CSS</NavLink>
               </Link>
             </NavItem>
+          </Nav>
+          <Nav className="ml-auto" navbar cssModule={css}>
             <NavItem cssModule={css}>
               <Link href="/auth/signin">
                 <NavLink cssModule={css} href="/auth/signin">Sign In</NavLink>
