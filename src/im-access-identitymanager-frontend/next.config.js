@@ -20,13 +20,10 @@ module.exports = withSass({
   },
   // webpackDevMiddleware(config) {
   //   // TODO: Setup/override dev middleware configuration
-
   //   return config;
   // },
   cssModules: true,
-  // cssLoaderOptions: {
-  //   importLoaders: 1
-  // },
+  cssLoaderOptions: { },
   crossOrigin: 'anonymous',
   generateBuildId: async () => {
     if (process.env.BUILD_ID) {
@@ -41,6 +38,5 @@ module.exports = withSass({
   //   sslCertificatePassphrase: process.env.SSL_CERT_PASSPHRASE
   // },
   // publicRuntimeConfig: {
-
   // }
 });

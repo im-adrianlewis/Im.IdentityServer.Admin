@@ -62,9 +62,14 @@ function createSignInAuthenticate(expressApp: express.Express, passport: passpor
       passport.authenticate(`OpenIdConnect${tenant}`));
   });
 
+  tenants.forEach(tenant => {
+    expressApp.post(
+      `/auth/signin/callback`,
+      passport.authenticate(`OpenIdConnect${tenant}`, { successRedirect: '/' }));
+  });
+
   expressApp.post(
     '/auth/signin/callback',
-    tenants.map(tenant => passport.authenticate(`OpenIdConnect${tenant}`, { successRedirect: '/' })),
     (req: express.Request, res: express.Response) => { if (req && res && req.session) res.redirect(req.session.returnTo || '/'); }
   );
 }

@@ -1,14 +1,17 @@
 FROM node:12
 
 # Set working directory
-WORKDIR /
+WORKDIR /app
+
+# Update NPM...
+RUN npm install -g npm
 
 # Installing dependencies
-COPY package*.json ./
+COPY package*.json /app/
 RUN npm install
 
 # Copying source files
-COPY . .
+COPY . /app
 
 # Building application
 RUN npm run build
