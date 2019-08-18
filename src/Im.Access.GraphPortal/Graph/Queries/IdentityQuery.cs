@@ -1,5 +1,6 @@
 ﻿using GraphQL;
 using GraphQL.Types;
+using Im.Access.GraphPortal.Graph.Queries.SelfGroup;
 using Im.Access.GraphPortal.Graph.Queries.TenantGroup;
 
 namespace Im.Access.GraphPortal.Graph.Queries
