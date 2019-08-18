@@ -9,7 +9,7 @@ declare module 'openid-client' {
     import { IncomingMessage } from 'http';
     import { GotOptions } from 'got';
     
-    export { }; // Disable automatic export of all module members (make it explicit)
+    //export { }; // Disable automatic export of all module members (make it explicit)
     
     //
     

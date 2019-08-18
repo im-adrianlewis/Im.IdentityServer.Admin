@@ -1,5 +1,5 @@
 import passport from 'passport';
-import { Strategy, Client, TokenSet, VerifyCallback } from 'openid-client';
+import * as oidc from 'openid-client';
 
 export default class PassportStrategyFactory {
   constructor(serverUrl: string) {
@@ -8,25 +8,26 @@ export default class PassportStrategyFactory {
 
   public getStrategy(
     tenant: string,
-    client: Client,
-    callback: (userInfo: any, tokenSet: TokenSet, verified: VerifyCallback) => void): passport.Strategy {
+    client: oidc.Client,
+    callback: (tokenSet: oidc.TokenSet, userInfo: any, verified: oidc.VerifyCallback) => void): passport.Strategy {
     
     var strategy = this.knownStrategies[tenant];
 
     if (!strategy) {
-      strategy = new Strategy({
+      strategy = new oidc.Strategy({
         client: client,
         params: {
           client_id: 'ImAccessGraph',
-          redirect_uri: `${this.serverUrl}/auth/signin/callback-${tenant}`,
+          redirect_uri: `${this.serverUrl}/auth/signin/callback-${tenant.toLowerCase()}`,
           response_type: 'code id_token token',
           response_mode: 'form_post',
           acr_values: `tenant:${tenant}`,
-          scope: 'openid profile',
+          scope: 'openid profile offline_access',
           prompt: 'login'
         },
         passReqToCallback: false,
-        sessionKey: 'oidc:identity',
+        sessionKey: 'idtymgr_session',
+        //sessionKey: `oidc:${tenant}`,
         usePKCE: false
       },
       callback);
@@ -37,7 +38,7 @@ export default class PassportStrategyFactory {
     return strategy;
   }
 
-  private knownStrategies: StringDictionary<Strategy> = {};
+  private knownStrategies: StringDictionary<oidc.Strategy> = {};
   private serverUrl: string;
 }
 

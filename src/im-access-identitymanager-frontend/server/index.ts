@@ -1,7 +1,7 @@
 import next from 'next';
 import { DEV, SERVER_HOST, SERVER_URL, SERVER_PORT_HTTP, SERVER_PORT_HTTPS } from '../src/constants/env';
 import { createReadStream, readFileSync } from 'fs';
-import http from 'http';
+import http, { IncomingMessage, ServerResponse } from 'http';
 import bodyParser from 'body-parser';
 import https from 'https';
 import hsts from 'hsts';
@@ -24,7 +24,7 @@ process.on('unhandledRejection', (reason, p) => {
 
 const strategyFactory = new PassportStrategyFactory(SERVER_URL);
 
-function createUserProfile(userInfo: any, tokenSet: TokenSet, verified: VerifyCallback) {
+function createUserProfile(tokenSet: TokenSet, userInfo: any, verified: VerifyCallback) {
   try {
     console.log(`OIDC verification phase`);
 
@@ -32,16 +32,15 @@ function createUserProfile(userInfo: any, tokenSet: TokenSet, verified: VerifyCa
       id: userInfo.sub,
       displayName: userInfo.displayName,
       email: userInfo.email,
-      emailVerified: userInfo.email_verified
+      emailVerified: userInfo.email_verified,
+      identity: {
+        accessToken: tokenSet.access_token,
+        refreshToken: tokenSet.refresh_token,
+        idToken: tokenSet.id_token
+      }
     };
 
-    let info = {
-      accessToken: tokenSet.access_token,
-      refreshToken: tokenSet.refresh_token,
-      idToken: tokenSet.id_token
-    };
-
-    verified(null, user, info);
+    verified(null, user);
   }
   catch(err) {
     verified(err, null);
@@ -63,7 +62,7 @@ function createSignInAuthenticate(expressApp: express.Express, passport: passpor
 
     expressApp.post(
       `/auth/signin/callback-${tenant.toLowerCase()}`,
-      passport.authenticate(`OpenIdConnect${tenant}`, { successRedirect: '/' }),
+      passport.authenticate(`OpenIdConnect${tenant}`, { successRedirect: '/', failureRedirect: `/auth/signin/${tenant.toLowerCase()}` }),
       (req: express.Request, res: express.Response) => { if (req && res && req.session) res.redirect(req.session.returnTo || '/'); });
   });
 }
@@ -84,7 +83,10 @@ nextApp
   .prepare()
   .then(async () => {
     const issuer = await Issuer.discover(`${process.env.IDENTITY_URL}/.well-known/openid-configuration`);
-    const client = new issuer.Client();
+    const client: any = new issuer.Client({
+      client_id: 'ImAccessGraph',
+      client_secret: 'secret'
+    });
 
     console.log(`Preparing to start server [HTTP: ${SERVER_PORT_HTTP}, HTTPS: ${SERVER_PORT_HTTPS}]`);
 
@@ -177,7 +179,7 @@ nextApp
       httpOnly: true,
       secure: isSecure,
       maxAge: 30 * 24 * 60 * 60 * 1000,
-      sameSite: true
+      //sameSite: 'lax'
     }));
 
     // Setup passport authentication and hook into express
@@ -186,6 +188,36 @@ nextApp
     expressApp.use(passport.session());
     createSignInAuthenticate(expressApp, passport, tenants);
     
+    expressApp.post('graphql', (req: IncomingMessage, res: ServerResponse) => {
+      if (req.method !== 'POST') {
+        res.statusCode = 404;
+        res.statusMessage = 'Not found';
+        res.end();
+        return;
+      }
+    
+      if (!!req.user) {
+        res.statusCode = 401;
+        res.statusMessage = 'Unauthorized';
+        res.end();
+        return;
+      }
+    
+      // TODO: Work out how to refresh the access token if we need to
+  
+      // Build fetch request using same body plus auth header
+      fetch({
+        url: 'https://localhost:44344/graphql',
+        method: 'POST',
+        body: '',
+        headers: [
+          "content-type": req.headers["content-type"],
+          "authorization": `Bearer ${req.user.identity.access_token}`
+        ]
+      });
+    
+    });
+
     // Catch-all handler to allow Next.js to handle all other routes
     expressApp.all('*', (req, res) => {
       const nextRequestHandler = nextApp.getRequestHandler();
