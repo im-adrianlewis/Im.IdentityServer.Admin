@@ -5,6 +5,7 @@ import http, { IncomingMessage, ServerResponse } from 'http';
 import bodyParser from 'body-parser';
 import https from 'https';
 import hsts from 'hsts';
+import url from 'url';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import cookieSession from 'cookie-session';
@@ -13,6 +14,7 @@ import { Issuer, TokenSet, VerifyCallback } from 'openid-client';
 import crypto from 'crypto';
 import tenants from '../src/constants/tenants';
 import PassportStrategyFactory from './passportStrategyFactory';
+import { ParsedUrlQuery } from 'querystring';
 
 process.on('uncaughtException', function(err) {
   console.error('Uncaught Exception: ', err);
@@ -188,35 +190,84 @@ nextApp
     expressApp.use(passport.session());
     createSignInAuthenticate(expressApp, passport, tenants);
     
-    expressApp.post('graphql', (req: IncomingMessage, res: ServerResponse) => {
-      if (req.method !== 'POST') {
-        res.statusCode = 404;
-        res.statusMessage = 'Not found';
-        res.end();
-        return;
-      }
-    
-      if (!!req.user) {
-        res.statusCode = 401;
-        res.statusMessage = 'Unauthorized';
-        res.end();
-        return;
-      }
-    
-      // TODO: Work out how to refresh the access token if we need to
+    expressApp.post(
+      '/graphql', 
+      async (req: IncomingMessage, res: ServerResponse) => {
+        if (typeof req.url === 'undefined') {
+          return;
+        }
+
+        if (!!(<any>req).user) {
+          res.statusCode = 401;
+          res.statusMessage = 'Unauthorized';
+          res.end();
+          return;
+        }
+      
+        // TODO: Work out how to refresh the access token if we need to
+
+        var targetUrl = 'https://localhost:44344/graphql';
+        var originalQueryParams: ParsedUrlQuery = url.parse(req.url, true).query;
+
+        if (req.method === 'POST') {
+          if (originalQueryParams.query) {
+            targetUrl += `?query=${originalQueryParams.query}`;
+          }
   
-      // Build fetch request using same body plus auth header
-      fetch({
-        url: 'https://localhost:44344/graphql',
-        method: 'POST',
-        body: '',
-        headers: [
-          "content-type": req.headers["content-type"],
-          "authorization": `Bearer ${req.user.identity.access_token}`
-        ]
+          var subResponse = await fetch(
+            targetUrl, {
+              method: 'POST',
+              body: '',
+              headers: {
+                'Content-Type': `${req.headers['content-type']}`,
+                'Authorization': `Bearer ${(<any>req).user.identity.access_token}`
+              },
+              referrer: SERVER_URL
+            });
+  
+          res.writeHead(
+            subResponse.status,
+            subResponse.statusText, {
+              'Content-Type': `${subResponse.headers.get('Content-Type')}`,
+              'Content-Length': `${subResponse.headers.get('Content-Length')}`
+            });
+      
+          res.end(subResponse.body);
+        } else if (req.method === 'GET') {
+          if (originalQueryParams.query) {
+            targetUrl += `?query=${originalQueryParams.query}`;
+
+            if (originalQueryParams.variables) {
+              targetUrl += `&variables=${originalQueryParams.variables}`;
+            }
+
+            if (originalQueryParams.operationName) {
+              targetUrl += `&operationName=${originalQueryParams.operationName}`;
+            }
+          }
+  
+          var subResponse = await fetch(
+            targetUrl, {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${(<any>req).user.identity.access_token}`
+              },
+              referrer: SERVER_URL
+            });
+  
+          res.writeHead(
+            subResponse.status,
+            subResponse.statusText, {
+              'Content-Type': `${subResponse.headers.get('Content-Type')}`,
+              'Content-Length': `${subResponse.headers.get('Content-Length')}`
+            });
+      
+          res.end(subResponse.body);
+        } else {
+          res.writeHead(404, 'Not found');
+          res.end();
+        }
       });
-    
-    });
 
     // Catch-all handler to allow Next.js to handle all other routes
     expressApp.all('*', (req, res) => {
