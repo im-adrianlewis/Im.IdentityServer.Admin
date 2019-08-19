@@ -1,5 +1,5 @@
 import next from 'next';
-import { DEV, SERVER_HOST, SERVER_URL, SERVER_PORT_HTTP, SERVER_PORT_HTTPS } from '../src/constants/env';
+import { DEV, SERVER_HOST, SERVER_URL, SERVER_PORT_HTTP, SERVER_PORT_HTTPS, GRAPHQL_ENDPOINT } from '../src/constants/env';
 import { createReadStream, readFileSync } from 'fs';
 import http, { IncomingMessage, ServerResponse } from 'http';
 import bodyParser from 'body-parser';
@@ -214,7 +214,7 @@ nextApp
       
         // TODO: Work out how to refresh the access token if we need to
 
-        var targetUrl = 'https://localhost:44344/graphql';
+        var targetUrl = GRAPHQL_ENDPOINT;
         var originalQueryParams: ParsedUrlQuery = url.parse(req.url, true).query;
 
         if (originalQueryParams.query) {
@@ -272,7 +272,7 @@ nextApp
       
         // TODO: Work out how to refresh the access token if we need to
 
-        var targetUrl = 'https://localhost:44344/graphql';
+        var targetUrl = GRAPHQL_ENDPOINT;
         var originalQueryParams: ParsedUrlQuery = url.parse(req.url, true).query;
 
         if (originalQueryParams.query) {

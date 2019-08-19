@@ -22,7 +22,7 @@ export default class PassportStrategyFactory {
           response_type: 'code id_token token',
           response_mode: 'form_post',
           acr_values: `tenant:${tenant}`,
-          scope: 'openid profile offline_access',
+          scope: 'openid profile email offline_access',
           prompt: 'login'
         },
         passReqToCallback: false,
