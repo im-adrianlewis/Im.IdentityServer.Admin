@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Form, Button, Card, CardTitle, CardBody } from 'reactstrap';
+import { Form, Button, Card, CardTitle, CardBody, CardSubtitle, Row, Col, Container } from 'reactstrap';
 import Router from 'next/router';
 import { Layout } from '../../src/components/Layout';
 import TenantDropdown from '../../src/components/TenantDropdown';
@@ -32,9 +32,18 @@ class SignIn extends React.Component<SignInProps, SignInState> {
         <Card cssModule={css}>
           <Form cssModule={css}>
             <CardBody cssModule={css}>
-              <CardTitle cssModule={css}>Select brand</CardTitle>
-              <TenantDropdown id="brand" onSelectedTenant={boundSelectedTenant} />
-              <Button cssModule={css} disabled={!this.state.hasTenant} onClick={boundNext}>Next</Button>
+              <CardTitle cssModule={css}>Brand</CardTitle>
+              <CardSubtitle cssModule={css}>Select the brand then click next to sign-in.</CardSubtitle>
+              <Container cssModule={css}>
+                <Row cssModule={css}>
+                  <Col cssModule={css} className="col-sm-10">
+                    <TenantDropdown id="brand" onSelectedTenant={boundSelectedTenant} />
+                  </Col>
+                  <Col cssModule={css} className="col-sm-2">
+                    <Button cssModule={css} disabled={!this.state.hasTenant} onClick={boundNext}>Next</Button>
+                  </Col>
+                </Row>
+              </Container>
             </CardBody>
           </Form>
         </Card>
