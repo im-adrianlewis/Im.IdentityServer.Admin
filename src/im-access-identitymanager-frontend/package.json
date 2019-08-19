@@ -19,7 +19,8 @@
     "test:coverage": "jest --coverage",
     "ts:check": "tsc --noEmit && tsc --project tsconfig.server.json --noEmit",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "build-docker": "docker build -t zenglobal/im-access-identitymanager-frontend ."
   },
   "dependencies": {
     "@zeit/next-css": "^1.0.1",

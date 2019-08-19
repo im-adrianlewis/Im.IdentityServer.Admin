@@ -63,7 +63,7 @@ namespace Im.Access.GraphPortal.Graph
                 };
             executionOptions.FieldMiddleware.Use<InstrumentFieldsMiddleware>();
 
-            var result = await _documentExecuter
+            var result = await new QueryOnlyDocumentExecuter()
                 .ExecuteAsync(executionOptions)
                 .ConfigureAwait(true);
 

@@ -10,11 +10,12 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import cookieSession from 'cookie-session';
 import passport from 'passport';
-import { Issuer, TokenSet, VerifyCallback } from 'openid-client';
+import oidc from 'openid-client';
 import crypto from 'crypto';
 import tenants from '../src/constants/tenants';
 import PassportStrategyFactory from './passportStrategyFactory';
 import { ParsedUrlQuery } from 'querystring';
+import fetch from 'isomorphic-fetch';
 
 process.on('uncaughtException', function(err) {
   console.error('Uncaught Exception: ', err);
@@ -26,7 +27,7 @@ process.on('unhandledRejection', (reason, p) => {
 
 const strategyFactory = new PassportStrategyFactory(SERVER_URL);
 
-function createUserProfile(tokenSet: TokenSet, userInfo: any, verified: VerifyCallback) {
+function createUserProfile(tokenSet: oidc.TokenSet, userInfo: any, verified: oidc.VerifyCallback) {
   try {
     console.log(`OIDC verification phase`);
 
@@ -64,8 +65,15 @@ function createSignInAuthenticate(expressApp: express.Express, passport: passpor
 
     expressApp.post(
       `/auth/signin/callback-${tenant.toLowerCase()}`,
-      passport.authenticate(`OpenIdConnect${tenant}`, { successRedirect: '/', failureRedirect: `/auth/signin/${tenant.toLowerCase()}` }),
-      (req: express.Request, res: express.Response) => { if (req && res && req.session) res.redirect(req.session.returnTo || '/'); });
+      passport.authenticate(`OpenIdConnect${tenant}`, {
+        successRedirect: '/',
+        failureRedirect: `/auth/signin/${tenant.toLowerCase()}`
+      }),
+      (req: express.Request, res: express.Response) => {
+        if (req && res && req.session) {
+          res.redirect(req.session.returnTo || '/');
+        }
+      });
   });
 }
 
@@ -84,7 +92,7 @@ const nextApp = next({
 nextApp
   .prepare()
   .then(async () => {
-    const issuer = await Issuer.discover(`${process.env.IDENTITY_URL}/.well-known/openid-configuration`);
+    const issuer = await oidc.Issuer.discover(`${process.env.IDENTITY_URL}/.well-known/openid-configuration`);
     const client: any = new issuer.Client({
       client_id: 'ImAccessGraph',
       client_secret: 'secret'
@@ -209,40 +217,43 @@ nextApp
         var targetUrl = 'https://localhost:44344/graphql';
         var originalQueryParams: ParsedUrlQuery = url.parse(req.url, true).query;
 
-        if (req.method === 'GET') {
-          if (originalQueryParams.query) {
-            targetUrl += `?query=${originalQueryParams.query}`;
+        if (originalQueryParams.query) {
+          targetUrl += `?query=${originalQueryParams.query}`;
 
-            if (originalQueryParams.variables) {
-              targetUrl += `&variables=${originalQueryParams.variables}`;
-            }
-
-            if (originalQueryParams.operationName) {
-              targetUrl += `&operationName=${originalQueryParams.operationName}`;
-            }
+          if (originalQueryParams.variables) {
+            targetUrl += `&variables=${originalQueryParams.variables}`;
           }
-  
-          var subResponse = await fetch(
-            targetUrl, {
-              method: 'GET',
-              headers: {
-                'Authorization': `Bearer ${(<any>req).user.identity.access_token}`
-              },
-              referrer: SERVER_URL
-            });
-  
-          res.writeHead(
-            subResponse.status,
-            subResponse.statusText, {
-              'Content-Type': `${subResponse.headers.get('Content-Type')}`,
-              'Content-Length': `${subResponse.headers.get('Content-Length')}`
-            });
-      
-          res.end(subResponse.body);
-        } else {
-          res.writeHead(404, 'Not found');
-          res.end();
+
+          if (originalQueryParams.operationName) {
+            targetUrl += `&operationName=${originalQueryParams.operationName}`;
+          }
         }
+
+        var subResponse = await fetch(
+          targetUrl, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${(<any>req).user.identity.accessToken}`
+            },
+            referrer: SERVER_URL
+          });
+
+        res.writeHead(
+          subResponse.status,
+          subResponse.statusText, {
+            'Content-Type': `${subResponse.headers.get('Content-Type')}`,
+            'Content-Length': `${subResponse.headers.get('Content-Length')}`
+          });
+          
+        if (subResponse.body != null) {
+          var reader = (<any>subResponse.body).readableBuffer.head;
+          while (reader !== null) {
+            res.write(reader.data);
+            reader = reader.next;
+          }
+        }
+
+        res.end();
       });
 
     expressApp.post(
@@ -264,34 +275,37 @@ nextApp
         var targetUrl = 'https://localhost:44344/graphql';
         var originalQueryParams: ParsedUrlQuery = url.parse(req.url, true).query;
 
-        if (req.method === 'POST') {
-          if (originalQueryParams.query) {
-            targetUrl += `?query=${originalQueryParams.query}`;
-          }
-  
-          var subResponse = await fetch(
-            targetUrl, {
-              method: 'POST',
-              body: '',
-              headers: {
-                'Content-Type': `${req.headers['content-type']}`,
-                'Authorization': `Bearer ${(<any>req).user.identity.access_token}`
-              },
-              referrer: SERVER_URL
-            });
-  
-          res.writeHead(
-            subResponse.status,
-            subResponse.statusText, {
-              'Content-Type': `${subResponse.headers.get('Content-Type')}`,
-              'Content-Length': `${subResponse.headers.get('Content-Length')}`
-            });
-      
-          res.end(subResponse.body);
-        } else {
-          res.writeHead(404, 'Not found');
-          res.end();
+        if (originalQueryParams.query) {
+          targetUrl += `?query=${originalQueryParams.query}`;
         }
+
+        var subResponse = await fetch(
+          targetUrl, {
+            method: 'POST',
+            body: '',
+            headers: {
+              'Content-Type': `${req.headers['content-type']}`,
+              'Authorization': `Bearer ${(<any>req).user.identity.accessToken}`
+            },
+            referrer: SERVER_URL
+          });
+
+        res.writeHead(
+          subResponse.status,
+          subResponse.statusText, {
+            'Content-Type': `${subResponse.headers.get('Content-Type')}`,
+            'Content-Length': `${subResponse.headers.get('Content-Length')}`
+          });
+      
+        if (subResponse.body !== null) {
+          var reader = (<any>subResponse.body).readableBuffer.head;
+          while (reader !== null) {
+            res.write(reader.data);
+            reader = reader.next;
+          }
+        }
+
+        res.end();
       });
 
     // Catch-all handler to allow Next.js to handle all other routes
