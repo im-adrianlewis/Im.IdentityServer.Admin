@@ -190,6 +190,61 @@ nextApp
     expressApp.use(passport.session());
     createSignInAuthenticate(expressApp, passport, tenants);
     
+    expressApp.get(
+      '/graphql',
+      async (req: IncomingMessage, res: ServerResponse) => {
+        if (typeof req.url === 'undefined') {
+          return;
+        }
+
+        if (!(<any>req).user) {
+          res.statusCode = 401;
+          res.statusMessage = 'Unauthorized';
+          res.end();
+          return;
+        }
+      
+        // TODO: Work out how to refresh the access token if we need to
+
+        var targetUrl = 'https://localhost:44344/graphql';
+        var originalQueryParams: ParsedUrlQuery = url.parse(req.url, true).query;
+
+        if (req.method === 'GET') {
+          if (originalQueryParams.query) {
+            targetUrl += `?query=${originalQueryParams.query}`;
+
+            if (originalQueryParams.variables) {
+              targetUrl += `&variables=${originalQueryParams.variables}`;
+            }
+
+            if (originalQueryParams.operationName) {
+              targetUrl += `&operationName=${originalQueryParams.operationName}`;
+            }
+          }
+  
+          var subResponse = await fetch(
+            targetUrl, {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${(<any>req).user.identity.access_token}`
+              },
+              referrer: SERVER_URL
+            });
+  
+          res.writeHead(
+            subResponse.status,
+            subResponse.statusText, {
+              'Content-Type': `${subResponse.headers.get('Content-Type')}`,
+              'Content-Length': `${subResponse.headers.get('Content-Length')}`
+            });
+      
+          res.end(subResponse.body);
+        } else {
+          res.writeHead(404, 'Not found');
+          res.end();
+        }
+      });
+
     expressApp.post(
       '/graphql', 
       async (req: IncomingMessage, res: ServerResponse) => {
@@ -197,7 +252,7 @@ nextApp
           return;
         }
 
-        if (!!(<any>req).user) {
+        if (!(<any>req).user) {
           res.statusCode = 401;
           res.statusMessage = 'Unauthorized';
           res.end();
@@ -220,36 +275,6 @@ nextApp
               body: '',
               headers: {
                 'Content-Type': `${req.headers['content-type']}`,
-                'Authorization': `Bearer ${(<any>req).user.identity.access_token}`
-              },
-              referrer: SERVER_URL
-            });
-  
-          res.writeHead(
-            subResponse.status,
-            subResponse.statusText, {
-              'Content-Type': `${subResponse.headers.get('Content-Type')}`,
-              'Content-Length': `${subResponse.headers.get('Content-Length')}`
-            });
-      
-          res.end(subResponse.body);
-        } else if (req.method === 'GET') {
-          if (originalQueryParams.query) {
-            targetUrl += `?query=${originalQueryParams.query}`;
-
-            if (originalQueryParams.variables) {
-              targetUrl += `&variables=${originalQueryParams.variables}`;
-            }
-
-            if (originalQueryParams.operationName) {
-              targetUrl += `&operationName=${originalQueryParams.operationName}`;
-            }
-          }
-  
-          var subResponse = await fetch(
-            targetUrl, {
-              method: 'GET',
-              headers: {
                 'Authorization': `Bearer ${(<any>req).user.identity.access_token}`
               },
               referrer: SERVER_URL
