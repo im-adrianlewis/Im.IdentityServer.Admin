@@ -16,6 +16,7 @@ import tenants from '../src/constants/tenants';
 import PassportStrategyFactory from './passportStrategyFactory';
 import { ParsedUrlQuery } from 'querystring';
 import fetch from 'isomorphic-fetch';
+import moment from 'moment';
 
 process.on('uncaughtException', function(err) {
   console.error('Uncaught Exception: ', err);
@@ -31,6 +32,10 @@ function createUserProfile(tokenSet: oidc.TokenSet, userInfo: any, verified: oid
   try {
     console.log(`OIDC verification phase`);
 
+    const now = moment.utc();
+    const refreshAfter = now.add(tokenSet.expires_in / 2, 's');
+    const expiresAfter = now.add(tokenSet.expires_in, 's');
+
     let user = {
       id: userInfo.sub,
       displayName: userInfo.displayName,
@@ -39,7 +44,9 @@ function createUserProfile(tokenSet: oidc.TokenSet, userInfo: any, verified: oid
       identity: {
         accessToken: tokenSet.access_token,
         refreshToken: tokenSet.refresh_token,
-        idToken: tokenSet.id_token
+        idToken: tokenSet.id_token,
+        refreshAfter: refreshAfter.toDate(),
+        expiresAfter: expiresAfter.toDate()
       }
     };
 
