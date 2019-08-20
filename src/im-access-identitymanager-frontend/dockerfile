@@ -23,4 +23,4 @@ COPY --from=builder /app .
 
 # Run the app
 EXPOSE 44370
-CMD [ "npm" "start" ]
+CMD [ "node" "-r" "dotenv/config" "dist/server.js" ]

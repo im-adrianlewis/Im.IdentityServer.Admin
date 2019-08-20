@@ -87,7 +87,7 @@ namespace Im.Access.GraphPortal
                     options =>
                     {
                         options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                        options.Authority = Configuration["Security:IdentityServer"];
+                        options.Authority = Configuration["IdentityServer"];
                         options.ClientId = "Admin API";
                         options.ClientSecret = Configuration["Security:IdentityGraphClientSecret"];
                         options.RequireHttpsMetadata = true;

@@ -1,0 +1,54 @@
+version: '3.7'
+services:
+  
+  frontend:
+    image: zenglobal/im-access-identitymanager-frontend:latest
+    links:
+      - "backend:graphqlapi"
+    ports:
+      - "3000"
+      - "44370"
+    networks:
+      - frontend
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+    environment:
+      - GRAPHQI_URI=https://graphqlapi:44344/graphql
+      - SERVER_HOST=www.identitymanager.local
+      - SERVER_PORT_HTTP=3000
+      - SERVER_PORT_HTTPS=44370
+      - SSL_CERT_PFXFILE=identitymanager.pfx
+      - SSL_CERT_PASSPHRASE=${FRONTEND_SSL_PASSPHRASE}
+      - COOKIE_SECRET=${FRONTEND_COOKIE_SECRET}
+      - MONGO_URI=
+      - IDENTITY_URL=${IDENTITYSERVER_URL}
+      - IDENTITY_CLIENT_ID=ImAccessGraph
+      - IDENTITY_CLIENT_SECRET=${FRONTEND_OIDC_CLIENT_SECRET}
+      - GOOGLE_TRACKING_ID=
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - BUILD_ID=1.0.0
+
+  backend:
+    image: zenglobal/im-access-graph-backend:latest
+    networks:
+      - backend
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+    environment:
+      - IdentityServer=${IDENTITYSERVER_URL}
+
+networks:
+  frontend:
+  backend:
+
+  

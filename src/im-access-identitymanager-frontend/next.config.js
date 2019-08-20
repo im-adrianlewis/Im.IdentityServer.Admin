@@ -1,8 +1,9 @@
 const withSass = require('@zeit/next-sass');
 const withWorkers = require('@zeit/next-workers');
+const withGraphql = require('next-plugin-graphql');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
-module.exports = withWorkers(withSass({
+module.exports = withGraphql(withWorkers(withSass({
   webpack(config, { buildId, dev, isServer, defaultLoaders, webpack }) {
     const csTarget = isServer ? 'server-side' : 'client-side';
     const environment = dev ? 'DEV environment' : 'PROD environment';
@@ -57,4 +58,4 @@ module.exports = withWorkers(withSass({
   // },
   // publicRuntimeConfig: {
   // }
-}));
+})));

@@ -40,3 +40,13 @@ declare module "worker-loader!*" {
   }
   export default WebpackWorker;
 }
+
+declare module '*.graphql' {
+  const resource: string
+  export = resource
+}
+
+declare module '*.gql' {
+  const resource: string
+  export = resource
+}
