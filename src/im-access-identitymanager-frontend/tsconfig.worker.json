@@ -1,0 +1,25 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": [
+      "webworker",
+      "es2017",
+      "scripthost"
+    ],
+    "module": "commonjs",
+    "outDir": "dist/workers",
+    "target": "es5",
+    "isolatedModules": false,
+    "noEmit": false
+  },
+  "exclude": [
+    "dist",
+    ".next",
+    "out",
+    "next.config.js",
+    "node_modules"
+  ],
+  "include": [
+    "workers/**/*.ts"
+  ]
+}

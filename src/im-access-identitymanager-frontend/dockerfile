@@ -1,20 +1,25 @@
-FROM node:12
+FROM node:12 AS builder
 
 # Set working directory
 WORKDIR /app
 
-# Update NPM...
-RUN npm install -g npm
-
 # Installing dependencies
-COPY package*.json /app/
+RUN npm install -g npm
+COPY package.json .
+COPY package-lock.json .
 RUN npm install
 
 # Copying source files
-COPY . /app
+COPY . .
 
 # Building application
 RUN npm run build
+
+# Copy from builder to final image
+FROM node:12
+
+WORKDIR /app
+COPY --from=builder /app .
 
 # Run the app
 EXPOSE 44370

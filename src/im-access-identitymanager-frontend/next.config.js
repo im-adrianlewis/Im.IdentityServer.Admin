@@ -1,7 +1,8 @@
 const withSass = require('@zeit/next-sass');
+const withWorkers = require('@zeit/next-workers');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
-module.exports = withSass({
+module.exports = withWorkers(withSass({
   webpack(config, { buildId, dev, isServer, defaultLoaders, webpack }) {
     const csTarget = isServer ? 'server-side' : 'client-side';
     const environment = dev ? 'DEV environment' : 'PROD environment';
@@ -15,6 +16,22 @@ module.exports = withSass({
       }));
     }
 
+    // config.module.rules.push({
+    //   test: /\.worker\.ts$/,
+    //   use: [
+    //     {
+    //       loader: 'worker-loader',
+    //       options: {
+    //         name: 'static/[hash].worker.js',
+    //         publicPath: '/_next/'
+    //       }
+    //     },
+    //     {
+    //       loader: 'babel-loader'
+    //     }
+    //   ]
+    // });
+
     config.node = { fs: 'empty' };
     return config;
   },
@@ -24,6 +41,7 @@ module.exports = withSass({
   // },
   cssModules: true,
   cssLoaderOptions: { },
+  workerLoaderOptions: { },
   crossOrigin: 'anonymous',
   generateBuildId: async () => {
     if (process.env.BUILD_ID) {
@@ -39,4 +57,4 @@ module.exports = withSass({
   // },
   // publicRuntimeConfig: {
   // }
-});
+}));

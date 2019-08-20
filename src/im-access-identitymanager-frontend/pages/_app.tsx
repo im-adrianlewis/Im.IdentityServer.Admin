@@ -5,6 +5,7 @@ import App, { Container, AppContext } from 'next/app';
 import makeStore from '../src/makeStore';
 import withRedux from 'next-redux-wrapper';
 import withReduxSaga from 'next-redux-saga';
+//import Worker from 'worker-loader!../offline/service.worker';
 
 //import { HelmetProvider } from 'react-helmet-async';
 // import NextSeo from 'next-seo';
@@ -17,6 +18,7 @@ export interface IdentityManagerAppProps {
 export class IdentityManagerApp extends App<IdentityManagerAppProps> {
   static async getInitialProps(appContext: AppContext) {
     let pageProps = {};
+    //let worker = new Worker();
 
     if (appContext.Component.getInitialProps) {
       pageProps = await appContext.Component.getInitialProps(appContext.ctx);

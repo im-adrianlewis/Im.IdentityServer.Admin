@@ -31,6 +31,10 @@ const strategyFactory = new PassportStrategyFactory(SERVER_URL);
 function createUserProfile(tokenSet: oidc.TokenSet, userInfo: any, verified: oidc.VerifyCallback) {
   try {
     console.log(`OIDC verification phase`);
+    if (typeof tokenSet === 'undefined' || typeof tokenSet.expires_in === 'undefined')
+    {
+      throw new Error('Invalid token-set.');
+    }
 
     const now = moment.utc();
     const refreshAfter = now.add(tokenSet.expires_in / 2, 's');
@@ -172,7 +176,7 @@ nextApp
     // Service worker
     expressApp.get('/sw.js', (_, res) => {
       res.setHeader('content-type', 'text/javascript');
-      createReadStream('./offline/serviceWorker.js').pipe(res);
+      createReadStream('./dist/workers/service.worker.js').pipe(res);
     });
   
     // Serve fonts from ionicons npm module
@@ -221,7 +225,7 @@ nextApp
       
         // TODO: Work out how to refresh the access token if we need to
 
-        var targetUrl = GRAPHQL_ENDPOINT;
+        var targetUrl: string = <string>GRAPHQL_ENDPOINT;
         var originalQueryParams: ParsedUrlQuery = url.parse(req.url, true).query;
 
         if (originalQueryParams.query) {
@@ -279,7 +283,7 @@ nextApp
       
         // TODO: Work out how to refresh the access token if we need to
 
-        var targetUrl = GRAPHQL_ENDPOINT;
+        var targetUrl: string = <string>GRAPHQL_ENDPOINT;
         var originalQueryParams: ParsedUrlQuery = url.parse(req.url, true).query;
 
         if (originalQueryParams.query) {
