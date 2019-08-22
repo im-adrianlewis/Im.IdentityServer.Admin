@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using GraphiQl;
 using GraphQL;
 using GraphQL.Http;
@@ -8,11 +11,13 @@ using Im.Access.GraphPortal.Data;
 using Im.Access.GraphPortal.Graph;
 using Im.Access.GraphPortal.Graph.Mutations;
 using Im.Access.GraphPortal.Graph.Queries;
+using Im.Access.GraphPortal.Graph.Queries.SelfGroup;
 using Im.Access.GraphPortal.Graph.Queries.TenantGroup;
 using Im.Access.GraphPortal.Graph.Subscriptions;
 using Im.Access.GraphPortal.Repositories;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -21,8 +26,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace Im.Access.GraphPortal
 {
@@ -56,6 +63,7 @@ namespace Im.Access.GraphPortal
             services.AddScoped<UserSearchCriteriaType>();
             services.AddScoped<UserType>();
             services.AddScoped<UserClaimType>();
+            services.AddScoped<MeType>();
 
             services.AddScoped<IUserStore, UserStore>();
             services.AddScoped<IUserRepository, UserRepository>();
@@ -67,45 +75,32 @@ namespace Im.Access.GraphPortal
                 });
 
             services
-                .AddAuthentication(
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(
                     options =>
                     {
-                        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                        options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-                    })
-                .AddCookie(
-                    options =>
-                    {
-                        options.Cookie.Name = ".im.access.graph";
-                        options.Cookie.HttpOnly = true;
-                        options.Cookie.SameSite = SameSiteMode.Strict;
-                        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-
-                        options.ExpireTimeSpan = TimeSpan.FromHours(1);
-                    })
-                .AddOpenIdConnect(
-                    options =>
-                    {
-                        options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                         options.Authority = Configuration["IdentityServer"];
-                        options.ClientId = "Admin API";
-                        options.ClientSecret = Configuration["Security:IdentityGraphClientSecret"];
-                        options.RequireHttpsMetadata = true;
-                        options.GetClaimsFromUserInfoEndpoint = true;
-                        options.ResponseMode = OpenIdConnectResponseMode.FormPost;
-                        options.ResponseType = OpenIdConnectResponseType.Code;
-
-                        options.ClaimActions.MapAllExcept("iss", "nbf", "exp", "aud", "nonce", "iat", "c_hash");
-
-                        options.Scope.Add("GraphApi");
-
-                        options.TokenValidationParameters =
-                            new TokenValidationParameters
-                            {
-                                NameClaimType = "name",
-                                RoleClaimType = "role"
-                            };
+                        options.Audience = $"{Configuration["IdentityServer"]}/resources";
                     });
+                //.AddOpenIdConnect(
+                //    options =>
+                //    {
+                //        options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                //        options.ClientId = "ImAccessGraphApi";
+                //        options.ClientSecret = Configuration["Security:IdentityGraphClientSecret"];
+                //        options.RequireHttpsMetadata = true;
+                //        options.GetClaimsFromUserInfoEndpoint = true;
+                //        options.ResponseMode = OpenIdConnectResponseMode.FormPost;
+                //        options.ResponseType = OpenIdConnectResponseType.Code;
+
+                //        options.ClaimActions.MapAllExcept("iss", "nbf", "exp", "aud", "nonce", "iat", "c_hash");
+
+                //        options.Scope.Add("im-access-graph-api_user:manage");
+                //        options.Scope.Add("im-access-graph-api_user:read");
+                //        options.Scope.Add("im-access-graph-api_client:manage");
+                //        options.Scope.Add("im-access-graph-api_client:read");
+
+                //    });
 
             services
                 .AddMvc(
@@ -114,12 +109,54 @@ namespace Im.Access.GraphPortal
                         options.InputFormatters.Add(new GraphQlMediaTypeFormatter(false));
                     })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services
+                .AddSwaggerGen(
+                    options =>
+                    {
+                        options.SwaggerDoc(
+                            "v1",
+                            new Info
+                            {
+                                Version = "v1",
+                                Title = "Im Access API",
+                                Description = "Comprehensive API for accessing identity information"
+                            });
+
+                        var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                        options.IncludeXmlComments(xmlPath);
+
+                        options.AddSecurityDefinition(
+                            "oauth2",
+                            new OAuth2Scheme
+                            {
+                                Type = "oauth2",
+                                Flow = "implicit",
+                                AuthorizationUrl = $"{Configuration["IdentityServer"]}/connect/authorize",
+                                TokenUrl = $"{Configuration["IdentityServer"]}/connect/token",
+                                Scopes =
+                                    new Dictionary<string, string>
+                                    {
+                                        { "im-access-graph-api_user:manage", "Graph API access to users with manage permissions." },
+                                        { "im-access-graph-api_user:read", "Graph API access to users with read permissions." },
+                                        { "im-access-graph-api_client:manage", "Graph API access to clients with manage permissions." },
+                                        { "im-access-graph-api_client:read", "Graph API access to clients with read permissions." }
+                                    }
+                            });
+                        options.AddSecurityRequirement(
+                            new Dictionary<string, IEnumerable<string>>
+                            {
+                                { "oauth2", new string[0] }
+                            });
+                    });
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
+                IdentityModelEventSource.ShowPII = true;
                 app.UseDeveloperExceptionPage();
             }
             else
@@ -133,6 +170,18 @@ namespace Im.Access.GraphPortal
             //app.UseCookiePolicy();
             app.UseAuthentication();
             app.UseGraphiQl();
+            app.UseSwagger();
+            app.UseSwaggerUI(
+                options =>
+                {
+                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Im Access API v1");
+
+                    options.OAuthClientId("ImAccessGraphSwagger");
+                    //options.OAuthClientSecret(Configuration["Security:IdentityGraphClientSecret"]);
+                    options.OAuthAppName("Im.Access.GraphPortal");
+                    options.OAuthScopeSeparator(" ");
+                    options.OAuthUseBasicAuthenticationWithAccessCodeGrant();
+                });
             app.UseMvc();
         }
     }

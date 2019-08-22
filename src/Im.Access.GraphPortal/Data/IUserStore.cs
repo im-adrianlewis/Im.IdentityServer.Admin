@@ -9,5 +9,8 @@ namespace Im.Access.GraphPortal.Data
         Task<PaginationResult<DbUser>> GetUsersAsync(
             UserSearchCriteria criteria,
             CancellationToken cancellationToken);
+
+        Task<DbUser> GetUserAsync(
+            string userId, CancellationToken cancellationToken);
     }
 }

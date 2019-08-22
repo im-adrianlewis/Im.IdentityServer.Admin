@@ -1,7 +1,9 @@
-﻿using GraphQL;
+﻿using System.Security.Claims;
+using GraphQL;
 using GraphQL.Types;
 using Im.Access.GraphPortal.Graph.Queries.SelfGroup;
 using Im.Access.GraphPortal.Graph.Queries.TenantGroup;
+using Im.Access.GraphPortal.Repositories;
 
 namespace Im.Access.GraphPortal.Graph.Queries
 {
@@ -20,17 +22,25 @@ namespace Im.Access.GraphPortal.Graph.Queries
                     {
                         Name = "tenantId"
                     }),
-                fieldResolver =>
+                fieldContext =>
                 {
                     var tenantType = dependencyResolver.Resolve<TenantType>();
-                    tenantType.TenantId = fieldResolver.GetArgument<string>("tenantId");
+                    tenantType.TenantId = fieldContext.GetArgument<string>("tenantId");
                     return tenantType;
                 });
 
-            Field<MeType>(
+            FieldAsync<MeType>(
                 "me",
                 "Access to information for the current caller.",
-                resolve: _ => new { });
+                resolve: async (fieldContext) =>
+                {
+                    var userRepo = dependencyResolver.Resolve<IUserRepository>();
+                    return await userRepo
+                        .GetSelfAsync(
+                            fieldContext.UserContext as ClaimsPrincipal,
+                            fieldContext.CancellationToken)
+                        .ConfigureAwait(false);
+                });
         }
     }
 }

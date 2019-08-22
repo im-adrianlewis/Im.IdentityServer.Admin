@@ -16,6 +16,23 @@ namespace Im.Access.GraphPortal.Repositories
             _userStore = userStore;
         }
 
+        public async Task<UserEntity> GetSelfAsync(
+            ClaimsPrincipal user,
+            CancellationToken cancellationToken)
+        {
+            if (!user.Identity.IsAuthenticated)
+            {
+                throw new InvalidOperationException("Missing user context");
+            }
+
+            var sub = user.FindFirst(ClaimTypes.NameIdentifier);
+            var result = await _userStore
+                .GetUserAsync(sub.Value, cancellationToken)
+                .ConfigureAwait(false);
+
+            return new UserEntity(result);
+        }
+
         public async Task<PaginationResult<UserEntity>> GetUsersAsync(
             ClaimsPrincipal user,
             CancellationToken cancellationToken,

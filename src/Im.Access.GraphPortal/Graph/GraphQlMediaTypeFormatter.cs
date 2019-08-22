@@ -19,6 +19,7 @@ namespace Im.Access.GraphPortal.Graph
         {
             _suppressInputFormatterBuffering = suppressInputFormatterBuffering;
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/graphql"));
+            SupportedEncodings.Add(Encoding.UTF8);
         }
 
         protected override bool CanReadType(Type type)

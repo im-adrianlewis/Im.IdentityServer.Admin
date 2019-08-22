@@ -6,13 +6,19 @@ using GraphQL;
 using GraphQL.Instrumentation;
 using GraphQL.Types;
 using GraphQL.Validation.Complexity;
+using Im.Access.GraphPortal.Graph;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 
-namespace Im.Access.GraphPortal.Graph
+namespace Im.Access.GraphPortal.Controllers
 {
+    /// <summary>
+    /// GraphQlController is the single entry-point into the GraphQL query environment.
+    /// </summary>
     [Route("GraphQl")]
     [ApiController]
+    [Authorize]
     public class GraphQlController : Controller
     {
         private readonly IDocumentExecuter _documentExecuter;
@@ -29,6 +35,17 @@ namespace Im.Access.GraphPortal.Graph
             _namedQueries.Add("get-users", "");
         }
 
+        /// <summary>
+        /// Get endpoint supports execution of GraphQL queries via a cacheable HTTP GET. 
+        /// </summary>
+        /// <remarks>
+        /// GraphQL mutations and subscriptions are not supported from this endpoint.
+        /// </remarks>
+        /// <param name="query">Mandatory query body</param>
+        /// <param name="operationName">Optional operation name if query body specifies multiple queries.</param>
+        /// <param name="variables">Optional set of variables to apply to the query.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> Get(
             [FromQuery] string query,
@@ -72,6 +89,16 @@ namespace Im.Access.GraphPortal.Graph
             return result.Errors?.Count > 0 ? (IActionResult)BadRequest(result) : Json(result);
         }
 
+        /// <summary>
+        /// Post endpoint supports execution of GraphQL queries.
+        /// </summary>
+        /// <remarks>
+        /// All GraphQL operations are valid from this endpoint (query, mutation, subscription)
+        /// </remarks>
+        /// <param name="explicitQuery">Optional explicit query passed on the query string.</param>
+        /// <param name="query">Query options passed in the request body.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> Post(
             [FromQuery(Name = "query")] string explicitQuery,

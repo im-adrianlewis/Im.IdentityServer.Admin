@@ -88,5 +88,18 @@ namespace Im.Access.GraphPortal.Data
                     Items = items
                 };
         }
+
+        public Task<DbUser> GetUserAsync(
+            string userId, CancellationToken cancellationToken)
+        {
+            return _context
+                .Users
+                .FindAsync(
+                    new[]
+                    {
+                        userId
+                    },
+                    cancellationToken);
+        }
     }
 }
