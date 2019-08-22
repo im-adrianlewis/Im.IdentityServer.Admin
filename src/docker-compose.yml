@@ -1,4 +1,4 @@
-version: '3.7'
+version: '2'
 services:
   
   frontend:
@@ -6,17 +6,12 @@ services:
     links:
       - "backend:graphqlapi"
     ports:
-      - "3000"
-      - "44370"
+      - "3000:3000"
+      - "44370:44370"
     networks:
-      - frontend
-    deploy:
-      replicas: 2
-      update_config:
-        parallelism: 2
-        delay: 10s
-      restart_policy:
-        condition: on-failure
+      backend_net:
+      frontend_net:
+        ipv4_address: 172.19.0.10
     environment:
       - GRAPHQI_URI=https://graphqlapi:44344/graphql
       - SERVER_HOST=www.identitymanager.local
@@ -36,19 +31,18 @@ services:
   backend:
     image: zenglobal/im-access-graph-backend:latest
     networks:
-      - backend
-    deploy:
-      replicas: 2
-      update_config:
-        parallelism: 2
-        delay: 10s
-      restart_policy:
-        condition: on-failure
+      - backend_net
     environment:
       - IdentityServer=${IDENTITYSERVER_URL}
 
 networks:
-  frontend:
-  backend:
-
-  
+  frontend_net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "false"
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.19.0.0/24
+          gateway: 172.19.0.1
+  backend_net:

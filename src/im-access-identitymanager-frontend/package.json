@@ -10,7 +10,7 @@
     "build:dev": "cross-env NODE_ENV=development nodemon && tsc --project tsconfig.worker.json && build-storybook",
     "build": "cross-env NODE_ENV=production next build && tsc --project tsconfig.server.json && tsc --project tsconfig.worker.json",
     "start:dev": "cross-env NODE_ENV=development ts-node -r dotenv/config --project tsconfig.server.json server/index.ts",
-    "start": "cross-env NODE_ENV=production node -r dotenv/config dist/server.js",
+    "start": "cross-env NODE_ENV=production node -r dotenv/config dist/server/index.js",
     "export": "next export",
     "analyze": "cross-env NODE_ENV=production ANALYZE=true next build",
     "test": "jest",

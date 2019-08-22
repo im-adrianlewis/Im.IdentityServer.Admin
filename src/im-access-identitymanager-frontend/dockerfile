@@ -1,26 +1,18 @@
-FROM node:12 AS builder
-
-# Set working directory
+FROM node:12 AS base
 WORKDIR /app
+EXPOSE 3000
+EXPOSE 44370
 
-# Installing dependencies
+FROM node:12 AS build
+WORKDIR /app
 RUN npm install -g npm
 COPY package.json .
 COPY package-lock.json .
 RUN npm install
-
-# Copying source files
 COPY . .
-
-# Building application
 RUN npm run build
 
-# Copy from builder to final image
-FROM node:12
-
+FROM base AS final
 WORKDIR /app
-COPY --from=builder /app .
-
-# Run the app
-EXPOSE 44370
-CMD [ "node" "-r" "dotenv/config" "dist/server.js" ]
+COPY --from=build /app .
+CMD [ "npm", "start" ]
