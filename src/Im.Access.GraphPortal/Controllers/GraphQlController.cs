@@ -10,13 +10,14 @@ using Im.Access.GraphPortal.Graph;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Im.Access.GraphPortal.Controllers
 {
     /// <summary>
     /// GraphQlController is the single entry-point into the GraphQL query environment.
     /// </summary>
-    [Route("GraphQl")]
+    [Route("graphql")]
     [ApiController]
     [Authorize]
     public class GraphQlController : Controller
@@ -47,10 +48,23 @@ namespace Im.Access.GraphPortal.Controllers
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet]
+        [SwaggerOperation(
+            Summary = "Executes Graph-QL queries",
+            Description = "Some queries require a bearer token before valid results can be obtained.",
+            OperationId = "GetQuery",
+            Tags = new[] { "Get", "Query" }
+        )]
+        [SwaggerResponse(400, "Query is invalid")]
         public async Task<IActionResult> Get(
-            [FromQuery] string query,
-            [FromQuery] string operationName,
-            [FromQuery] string variables,
+            [FromQuery]
+            [SwaggerParameter("Query body", Required = true)]
+            string query,
+            [FromQuery]
+            [SwaggerParameter("Operation name", Required = false)]
+            string operationName,
+            [FromQuery]
+            [SwaggerParameter("Query variables", Required = false)]
+            string variables,
             CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(query))
@@ -95,27 +109,38 @@ namespace Im.Access.GraphPortal.Controllers
         /// <remarks>
         /// All GraphQL operations are valid from this endpoint (query, mutation, subscription)
         /// </remarks>
-        /// <param name="explicitQuery">Optional explicit query passed on the query string.</param>
-        /// <param name="query">Query options passed in the request body.</param>
+        /// <param name="query">Optional explicit query passed on the query string.</param>
+        /// <param name="model">Graph model passed in the request body.</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPost]
+        [SwaggerOperation(
+            Summary = "Executes Graph-QL queries, mutations and subscriptions",
+            Description = "Some queries require a bearer token before valid results can be obtained.",
+            OperationId = "PostQuery",
+            Tags = new []{ "Post", "Query" }
+        )]
+        [SwaggerResponse(400, "Query is invalid")]
         public async Task<IActionResult> Post(
-            [FromQuery(Name = "query")] string explicitQuery,
-            [FromBody] GraphQlQuery query,
+            [FromQuery]
+            [SwaggerParameter("Explicit query", Required = false)]
+            string query,
+            [FromBody]
+            [SwaggerParameter("Graph query model", Required = true)]
+            GraphQlQuery model,
             CancellationToken cancellationToken)
         {
-            if (query == null)
+            if (model == null)
             {
                 return BadRequest("Missing query body.");
             }
 
             // Determine query to execute
-            var queryToExecute = explicitQuery ?? query.Query;
-            if (!string.IsNullOrWhiteSpace(query.NamedQuery) &&
-                !_namedQueries.TryGetValue(query.NamedQuery, out queryToExecute))
+            var queryToExecute = query ?? model.Query;
+            if (!string.IsNullOrWhiteSpace(model.NamedQuery) &&
+                !_namedQueries.TryGetValue(model.NamedQuery, out queryToExecute))
             {
-                return BadRequest($"Named query, {query.NamedQuery}, not found.");
+                return BadRequest($"Named query, {model.NamedQuery}, not found.");
             }
 
             var startTime = DateTime.UtcNow;
@@ -124,8 +149,8 @@ namespace Im.Access.GraphPortal.Controllers
                 {
                     Schema = _schema,
                     Query = queryToExecute,
-                    OperationName = query.OperationName,
-                    Inputs = query.Variables.ToInputs(),
+                    OperationName = model.OperationName,
+                    Inputs = model.Variables.ToInputs(),
                     UserContext = User,
                     CancellationToken = cancellationToken,
                     ComplexityConfiguration = new ComplexityConfiguration { MaxDepth = 15 },

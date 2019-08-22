@@ -82,25 +82,6 @@ namespace Im.Access.GraphPortal
                         options.Authority = Configuration["IdentityServer"];
                         options.Audience = $"{Configuration["IdentityServer"]}/resources";
                     });
-                //.AddOpenIdConnect(
-                //    options =>
-                //    {
-                //        options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                //        options.ClientId = "ImAccessGraphApi";
-                //        options.ClientSecret = Configuration["Security:IdentityGraphClientSecret"];
-                //        options.RequireHttpsMetadata = true;
-                //        options.GetClaimsFromUserInfoEndpoint = true;
-                //        options.ResponseMode = OpenIdConnectResponseMode.FormPost;
-                //        options.ResponseType = OpenIdConnectResponseType.Code;
-
-                //        options.ClaimActions.MapAllExcept("iss", "nbf", "exp", "aud", "nonce", "iat", "c_hash");
-
-                //        options.Scope.Add("im-access-graph-api_user:manage");
-                //        options.Scope.Add("im-access-graph-api_user:read");
-                //        options.Scope.Add("im-access-graph-api_client:manage");
-                //        options.Scope.Add("im-access-graph-api_client:read");
-
-                //    });
 
             services
                 .AddMvc(
@@ -169,7 +150,7 @@ namespace Im.Access.GraphPortal
             //app.UseStaticFiles();
             //app.UseCookiePolicy();
             app.UseAuthentication();
-            app.UseGraphiQl();
+            app.UseGraphiQl("/igraphql");
             app.UseSwagger();
             app.UseSwaggerUI(
                 options =>
