@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using GraphiQl;
 using GraphQL;
 using GraphQL.Http;
+using GraphQL.Server;
+using GraphQL.Server.Ui.GraphiQL;
+using GraphQL.Server.Ui.Playground;
+using GraphQL.Server.Ui.Voyager;
 using GraphQL.Types;
 using GraphQL.Types.Relay;
 using Im.Access.GraphPortal.Data;
@@ -15,20 +18,14 @@ using Im.Access.GraphPortal.Graph.Queries.SelfGroup;
 using Im.Access.GraphPortal.Graph.Queries.TenantGroup;
 using Im.Access.GraphPortal.Graph.Subscriptions;
 using Im.Access.GraphPortal.Repositories;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace Im.Access.GraphPortal
@@ -92,6 +89,15 @@ namespace Im.Access.GraphPortal
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services
+                .AddGraphQL(
+                    options =>
+                    {
+                        options.EnableMetrics = true;
+                    })
+                .AddWebSockets()
+                .AddDataLoader();
+
+            services
                 .AddSwaggerGen(
                     options =>
                     {
@@ -150,7 +156,25 @@ namespace Im.Access.GraphPortal
             //app.UseStaticFiles();
             //app.UseCookiePolicy();
             app.UseAuthentication();
-            app.UseGraphiQl("/igraphql");
+            app.UseWebSockets();
+            app.UseGraphQLWebSockets<IdentitySchema>();
+            app.UseGraphiQLServer(
+                new GraphiQLOptions
+                {
+                    GraphiQLPath = "/ui/graphiql",
+                    GraphQLEndPoint = "/graphql"
+                });
+            app.UseGraphQLPlayground(
+                new GraphQLPlaygroundOptions
+                {
+                    Path = "/ui/playground"
+                });
+            app.UseGraphQLVoyager(
+                new GraphQLVoyagerOptions
+                {
+                    GraphQLEndPoint = "/graphql",
+                    Path = "/ui/voyager"
+                });
             app.UseSwagger();
             app.UseSwaggerUI(
                 options =>

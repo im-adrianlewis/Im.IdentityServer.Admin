@@ -94,12 +94,9 @@ namespace Im.Access.GraphPortal.Data
         {
             return _context
                 .Users
-                .FindAsync(
-                    new[]
-                    {
-                        userId
-                    },
-                    cancellationToken);
+                .Include(e => e.Claims)
+                .Where(u => u.Id == userId)
+                .FirstOrDefaultAsync(cancellationToken);
         }
     }
 }

@@ -19,7 +19,7 @@ namespace Im.Access.GraphPortal.Controllers
     /// </summary>
     [Route("graphql")]
     [ApiController]
-    [Authorize]
+    // [Authorize]
     public class GraphQlController : Controller
     {
         private readonly IDocumentExecuter _documentExecuter;
