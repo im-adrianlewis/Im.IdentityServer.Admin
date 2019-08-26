@@ -1,0 +1,12 @@
+query getusers($criteria: UserSearchCriteria!) {
+  users {
+    find(criteria: $criteria) {
+      id
+      email
+      emailConfirmed
+      firstName
+      lastName
+      tenantId
+    }
+  }
+}

@@ -3,8 +3,8 @@ import { all, fork } from 'redux-saga/effects';
 
 // import { LayoutState, LayoutReducer } from './layout';
 
-// import { RouterState } from 'connected-next-router/types';
-// import { routerReducer } from 'connected-next-router/es';
+import { RouterState } from 'connected-next-router/types';
+import { routerReducer } from 'connected-next-router';
 
 import { analyticsSaga } from './analytics/sagas';
 import { AnalyticsState } from './analytics/types';
@@ -18,26 +18,33 @@ import { conversationSaga } from './conversation/sagas';
 import { ConversationState } from './conversation/types';
 import { ConversationReducer } from './conversation/reducer';
 
+import { userQuerySaga } from './user-query/sagas';
+import { UserQueryState } from './user-query/types';
+import { UserQueryReducer } from './user-query/reducer';
+
 export interface IApplicationState {
   //layout: LayoutState;
-  //route: RouterState;
+  route: RouterState;
   activeBrand: ActiveBrandState;
-  conversation: ConversationState;
   analtyics: AnalyticsState;
+  conversation: ConversationState;
+  userQuery: UserQueryState;
 }
 
 export const rootReducer = combineReducers<IApplicationState>({
   //layout: LayoutReducer,
-  //route: routerReducer,
+  route: routerReducer,
   activeBrand: ActiveBrandReducer,
+  analtyics: AnalyticsReducer,
   conversation: ConversationReducer,
-  analtyics: AnalyticsReducer
+  userQuery: UserQueryReducer
 });
 
 export function* rootSaga() {
   yield all([
     fork(activeBrandSaga),
+    fork(analyticsSaga),
     fork(conversationSaga),
-    fork(analyticsSaga)
+    fork(userQuerySaga)
   ]);
 }

@@ -11,7 +11,7 @@ export default class extends Document {
 
   public render() {
     return (
-      <html lang={this.props.__NEXT_DATA__.props.pageProps && this.props.__NEXT_DATA__.props.pageProps.lang || 'en'}>
+      <html lang={this.props.__NEXT_DATA__.props && this.props.__NEXT_DATA__.props.pageProps && this.props.__NEXT_DATA__.props.pageProps.lang || 'en'}>
         <Head>
         </Head>
         <body>

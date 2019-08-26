@@ -1,0 +1,11 @@
+query getself {
+  users {
+    me {
+      id
+      email
+      emailConfirmed
+      firstName
+      lastName
+    }
+  }
+}

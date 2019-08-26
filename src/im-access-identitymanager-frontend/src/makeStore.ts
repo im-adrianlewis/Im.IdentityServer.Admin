@@ -1,6 +1,6 @@
 import { Store, Action, createStore, applyMiddleware } from 'redux';
 import createSagaMiddleware, { Task } from 'redux-saga';
-// import { createRouterMiddleware, initialRouterState } from 'connected-next-router/es';
+import { createRouterMiddleware, initialRouterState } from 'connected-next-router';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import { createLogger } from 'redux-logger';
 import { MakeStoreOptions } from 'next-redux-wrapper';
@@ -16,19 +16,19 @@ export default function makeStore(
 ): Store<IApplicationState> {
   if (options.isServer && typeof window === 'undefined') {
     // Server-side
-    // if (!initialState.route) {
-    //   initialState.route = initialRouterState('/');
-    // }
+    if (initialState && !initialState.route) {
+      initialState.route = initialRouterState('/');
+    }
 
     const sagaMiddleware = createSagaMiddleware();
-    // const routerMiddleware = createRouterMiddleware();
+    const routerMiddleware = createRouterMiddleware();
 
     const store = createStore<IApplicationState, Action<any>, {}, {}>(
       rootReducer,
       initialState,
       applyMiddleware(
-        sagaMiddleware/*,
-        routerMiddleware*/)
+        sagaMiddleware,
+        routerMiddleware)
     ) as SagaStore;
     
     store.sagaTask = sagaMiddleware.run(rootSaga);
@@ -38,7 +38,7 @@ export default function makeStore(
     // Client-side
     const composeEnhancers = composeWithDevTools({});
     const sagaMiddleware = createSagaMiddleware();
-    // const routerMiddleware = createRouterMiddleware();
+    const routerMiddleware = createRouterMiddleware();
     const loggingMiddleware = createLogger({
       predicate: (_/*getState*/, action) => !/^@@/.test(action.type),
       collapsed: true
@@ -50,7 +50,7 @@ export default function makeStore(
       composeEnhancers(
         applyMiddleware(
           sagaMiddleware,
-          // routerMiddleware,
+          routerMiddleware,
           loggingMiddleware))
     ) as SagaStore;
 
