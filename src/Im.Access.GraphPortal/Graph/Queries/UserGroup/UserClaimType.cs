@@ -1,7 +1,7 @@
 ﻿using GraphQL.Types;
 using Im.Access.GraphPortal.Repositories;
 
-namespace Im.Access.GraphPortal.Graph.Queries.TenantGroup
+namespace Im.Access.GraphPortal.Graph.Queries.UserGroup
 {
     public class UserClaimType : ObjectGraphType<UserClaimEntity>
     {

@@ -1,15 +1,14 @@
-﻿using GraphQL;
-using GraphQL.Types;
+﻿using GraphQL.Types;
 using Im.Access.GraphPortal.Repositories;
 
-namespace Im.Access.GraphPortal.Graph.Queries.SelfGroup
+namespace Im.Access.GraphPortal.Graph.Queries.UserGroup
 {
-    public class MeType : ObjectGraphType<UserEntity>
+    public class UserType : ObjectGraphType<UserEntity>
     {
-        public MeType(IDependencyResolver dependencyResolver)
+        public UserType()
         {
-            Name = "Me";
-            Description = "Object for querying information about the current caller.";
+            Name = "User";
+            Description = "Represents a single user.";
 
             Field(u => u.Id).Description("User identifier");
             Field(u => u.TenantId).Description("Tenant associated with the user account");
@@ -41,7 +40,7 @@ namespace Im.Access.GraphPortal.Graph.Queries.SelfGroup
             Field(u => u.FirstPartyIM).Description("Flag indicating whether user has opted-in for first-party mails");
             Field(u => u.FirstPartyImUpdatedDate).Description("Date when first-party opt-in flag was last changed");
             Field(u => u.AuthenticationType).Description("Authentication mechanism used when user was registered");
-            //Field<ListGraphType<UserClaimType>>("Claims", "User's claims");
+            Field<ListGraphType<UserClaimType>>("Claims", "User's claims");
         }
     }
 }

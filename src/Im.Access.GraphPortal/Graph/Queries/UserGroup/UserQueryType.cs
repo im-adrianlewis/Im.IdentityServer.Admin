@@ -2,14 +2,26 @@
 using GraphQL.Types;
 using Im.Access.GraphPortal.Repositories;
 
-namespace Im.Access.GraphPortal.Graph.Queries.TenantGroup
+namespace Im.Access.GraphPortal.Graph.Queries.UserGroup
 {
-    public class UserTenantType : ObjectGraphType
+    public class UserQueryType : ObjectGraphType
     {
-        public UserTenantType(IUserRepository userRepository)
+        public UserQueryType(IUserRepository userRepository)
         {
-            Name = "UserTenant";
-            Description = "Query operations scoped to a single tenant.";
+            Name = "Users";
+            Description = "Query operations scoped to user operations.";
+
+            FieldAsync<UserType>(
+                "me",
+                "Access to information for the current caller.",
+                resolve: async (fieldContext) =>
+                {
+                    return await userRepository
+                        .GetSelfAsync(
+                            fieldContext.UserContext as ClaimsPrincipal,
+                            fieldContext.CancellationToken)
+                        .ConfigureAwait(false);
+                });
 
             FieldAsync<PaginationType<UserType, UserEntity>>(
                 "find",
@@ -25,7 +37,6 @@ namespace Im.Access.GraphPortal.Graph.Queries.TenantGroup
                 resolve: async fieldResolver =>
                 {
                     var searchCriteria = fieldResolver.GetArgument<UserSearchCriteria>("criteria");
-                    searchCriteria.TenantId = TenantId;
 
                     // ReSharper disable once ConvertToLambdaExpression
                     return await userRepository
@@ -36,7 +47,5 @@ namespace Im.Access.GraphPortal.Graph.Queries.TenantGroup
                         .ConfigureAwait(false);
                 });
         }
-
-        internal string TenantId { get; set; }
     }
 }

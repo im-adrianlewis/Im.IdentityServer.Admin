@@ -14,8 +14,7 @@ using Im.Access.GraphPortal.Data;
 using Im.Access.GraphPortal.Graph;
 using Im.Access.GraphPortal.Graph.Mutations;
 using Im.Access.GraphPortal.Graph.Queries;
-using Im.Access.GraphPortal.Graph.Queries.SelfGroup;
-using Im.Access.GraphPortal.Graph.Queries.TenantGroup;
+using Im.Access.GraphPortal.Graph.Queries.UserGroup;
 using Im.Access.GraphPortal.Graph.Subscriptions;
 using Im.Access.GraphPortal.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -55,12 +54,10 @@ namespace Im.Access.GraphPortal
             services.AddScoped<IdentityMutation>();
             services.AddScoped<IdentitySubscription>();
 
-            services.AddScoped<TenantType>();
-            services.AddScoped<UserTenantType>();
+            services.AddScoped<UserQueryType>();
             services.AddScoped<UserSearchCriteriaType>();
             services.AddScoped<UserType>();
             services.AddScoped<UserClaimType>();
-            services.AddScoped<MeType>();
 
             services.AddScoped<IUserStore, UserStore>();
             services.AddScoped<IUserRepository, UserRepository>();
@@ -167,22 +164,22 @@ namespace Im.Access.GraphPortal
             app.UseGraphQLPlayground(
                 new GraphQLPlaygroundOptions
                 {
-                    Path = "/ui/playground"
+                    Path = "/ui/playground",
+                    GraphQLEndPoint = "/graphql"
                 });
             app.UseGraphQLVoyager(
                 new GraphQLVoyagerOptions
                 {
-                    GraphQLEndPoint = "/graphql",
-                    Path = "/ui/voyager"
+                    Path = "/ui/voyager",
+                    GraphQLEndPoint = "/graphql"
                 });
             app.UseSwagger();
             app.UseSwaggerUI(
                 options =>
                 {
-                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Im Access API v1");
-
+                    options.SwaggerEndpoint(
+                        "/swagger/v1/swagger.json", "Im Access API v1");
                     options.OAuthClientId("ImAccessGraphSwagger");
-                    //options.OAuthClientSecret(Configuration["Security:IdentityGraphClientSecret"]);
                     options.OAuthAppName("Im.Access.GraphPortal");
                     options.OAuthScopeSeparator(" ");
                     options.OAuthUseBasicAuthenticationWithAccessCodeGrant();

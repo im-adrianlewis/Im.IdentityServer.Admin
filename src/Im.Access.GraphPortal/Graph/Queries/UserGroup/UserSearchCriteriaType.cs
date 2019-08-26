@@ -2,7 +2,7 @@
 using GraphQL.Types;
 using Im.Access.GraphPortal.Repositories;
 
-namespace Im.Access.GraphPortal.Graph.Queries.TenantGroup
+namespace Im.Access.GraphPortal.Graph.Queries.UserGroup
 {
     public class UserSearchCriteriaType : InputObjectGraphType<UserSearchCriteria>
     {
@@ -11,6 +11,8 @@ namespace Im.Access.GraphPortal.Graph.Queries.TenantGroup
             Name = "UserSearchCriteria";
             Description = "User search criteria used to filter result-set.";
 
+            Field(c => c.TenantId, true)
+                .Description("Limit search to specified tenant");
             Field(c => c.FirstName, true)
                 .Description("First name search pattern");
             Field(c => c.LastName, true)
