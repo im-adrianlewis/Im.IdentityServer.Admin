@@ -9,21 +9,6 @@ import classNames from 'classnames';
 // import NextSeo from 'next-seo';
 
 export default class extends Page {
-  public componentDidMount() {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then(registration => {
-          console.log('Service worker registration successful with scope: ', registration.scope);
-        })
-        .catch(err => {
-          console.error('Service worker registration failed', err);
-        });
-    } else {
-      console.log('Service worker not supported');
-    }
-  }
-
   public render() {
     return (
       <Layout {...this.props} showNavMenu={true}>

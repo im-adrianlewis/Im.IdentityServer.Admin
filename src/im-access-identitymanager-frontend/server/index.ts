@@ -1,11 +1,12 @@
 import next from 'next';
 import { DEV, SERVER_HOST, SERVER_URL, SERVER_PORT_HTTP, SERVER_PORT_HTTPS, GRAPHQL_ENDPOINT } from '../src/constants/env';
-import { createReadStream, readFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import http, { IncomingMessage, ServerResponse } from 'http';
 import bodyParser from 'body-parser';
 import https from 'https';
 import hsts from 'hsts';
 import url from 'url';
+import path from 'path';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import cookieSession from 'cookie-session';
@@ -173,12 +174,7 @@ nextApp
       });
 
     // Static resources
-    // Service worker
-    expressApp.get('/sw.js', (_, res) => {
-      res.setHeader('content-type', 'text/javascript');
-      createReadStream('./dist/workers/service.worker.js').pipe(res);
-    });
-  
+
     // Serve fonts from ionicons npm module
     expressApp.use('/fonts/ionicons', express.static('./node_modules/ionicons/dist/fonts'));
     
@@ -321,8 +317,14 @@ nextApp
 
     // Catch-all handler to allow Next.js to handle all other routes
     expressApp.all('*', (req, res) => {
-      const nextRequestHandler = nextApp.getRequestHandler();
-      return nextRequestHandler(req, res);
+      const pathName = <string>url.parse(req.url, true).pathname;
+      if (pathName === '/service-worker.js') {
+        const filePath = path.join(__dirname, '.next', pathName);
+        return nextApp.serveStatic(req, res, filePath);
+      } else {
+        const nextRequestHandler = nextApp.getRequestHandler();
+        return nextRequestHandler(req, res);
+      }
     });
 
     // Start Next.js listener

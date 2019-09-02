@@ -11,12 +11,36 @@ interface SagaStore extends Store<IApplicationState, Action<any>> {
 }
 
 export default function makeStore(
-  initialState: IApplicationState,
+  initialState: IApplicationState = {
+    route: {
+      location: {
+        href: '',
+        hash: '',
+        pathname: '',
+        search: ''
+      },
+      action: 'POP'
+    },
+    activeBrand: {
+      loading: false
+    },
+    analtyics: {
+      initialised: false,
+      initialising: false,
+      skipped: false
+    },
+    conversation: {
+      loading: false
+    },
+    userQuery: {
+      loading: false
+    }
+  },
   options: MakeStoreOptions
 ): Store<IApplicationState> {
   if (options.isServer && typeof window === 'undefined') {
     // Server-side
-    if (initialState && !initialState.route) {
+    if (!initialState.route || initialState.route.location.href === '') {
       initialState.route = initialRouterState('/');
     }
 
@@ -57,5 +81,5 @@ export default function makeStore(
     store.sagaTask = sagaMiddleware.run(rootSaga);
 
     return store;
-  } 
+  }
 }

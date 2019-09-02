@@ -5,7 +5,6 @@ import App, { Container, AppContext } from 'next/app';
 import makeStore from '../src/makeStore';
 import withRedux from 'next-redux-wrapper';
 import withReduxSaga from 'next-redux-saga';
-//import Worker from 'worker-loader!../offline/service.worker';
 
 //import { HelmetProvider } from 'react-helmet-async';
 // import NextSeo from 'next-seo';

@@ -1,9 +1,9 @@
-const withSass = require('@zeit/next-sass');
-const withWorkers = require('@zeit/next-workers');
-const withGraphql = require('next-plugin-graphql');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const withSass = require('@zeit/next-sass');
+const withGraphql = require('next-plugin-graphql');
+const withOffline = require('next-offline');
 
-module.exports = withGraphql(withWorkers(withSass({
+module.exports = withGraphql(withOffline(withSass({
   webpack(config, { buildId, dev, isServer, defaultLoaders, webpack }) {
     const csTarget = isServer ? 'server-side' : 'client-side';
     const environment = dev ? 'DEV environment' : 'PROD environment';
@@ -16,22 +16,6 @@ module.exports = withGraphql(withWorkers(withSass({
         openAnalyzer: true
       }));
     }
-
-    // config.module.rules.push({
-    //   test: /\.worker\.ts$/,
-    //   use: [
-    //     {
-    //       loader: 'worker-loader',
-    //       options: {
-    //         name: 'static/[hash].worker.js',
-    //         publicPath: '/_next/'
-    //       }
-    //     },
-    //     {
-    //       loader: 'babel-loader'
-    //     }
-    //   ]
-    // });
 
     config.node = { fs: 'empty' };
     return config;
@@ -51,11 +35,5 @@ module.exports = withGraphql(withWorkers(withSass({
 
     // Fallback to default build id generation
     return null;
-  },
-  // serverRuntimeConfig: {
-  //   sslCertificateFilename: process.env.SSL_CERT_PFXFILE,
-  //   sslCertificatePassphrase: process.env.SSL_CERT_PASSPHRASE
-  // },
-  // publicRuntimeConfig: {
-  // }
+  }
 })));
