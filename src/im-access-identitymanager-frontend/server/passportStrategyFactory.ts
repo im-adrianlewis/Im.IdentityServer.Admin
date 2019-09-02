@@ -27,7 +27,6 @@ export default class PassportStrategyFactory {
         },
         passReqToCallback: false,
         sessionKey: 'idtymgr_session',
-        //sessionKey: `oidc:${tenant}`,
         usePKCE: false
       },
       callback);
