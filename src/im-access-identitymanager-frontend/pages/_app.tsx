@@ -1,7 +1,7 @@
 import 'isomorphic-fetch';
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import App, { Container, AppContext } from 'next/app';
+import App, { AppContext } from 'next/app';
 import makeStore from '../src/makeStore';
 import withRedux from 'next-redux-wrapper';
 import withReduxSaga from 'next-redux-saga';
@@ -32,15 +32,13 @@ export class IdentityManagerApp extends App<IdentityManagerAppProps> {
     const { Component, pageProps, store } = this.props;
 
     return (
-      <Container>
-        <Provider store={store}>
-          {/* <HelmetProvider context={this.helmetContext}> */}
-            {/* <NextSeo /> */}
-            {/* <Component {...pageProps} helmetContext={this.helmetContext} /> */}
-            <Component {...pageProps} />
-          {/* </HelmetProvider> */}
-        </Provider>
-      </Container>
+      <Provider store={store}>
+        {/* <HelmetProvider context={this.helmetContext}> */}
+          {/* <NextSeo /> */}
+          {/* <Component {...pageProps} helmetContext={this.helmetContext} /> */}
+          <Component {...pageProps} />
+        {/* </HelmetProvider> */}
+      </Provider>
     );
   }
 }
