@@ -1,11 +1,10 @@
 import * as React from 'react';
-import Head from 'next/head';
 import Link from 'next/link';
 import { withRouter } from 'next/router';
 import { WithRouterProps } from 'next/dist/client/with-router';
 import { Container } from 'reactstrap';
 import { NextPageContext } from 'next';
-//import Styles from '../css/index.scss';
+import css from '../css/index.scss';
 
 interface ErrorPageProps extends WithRouterProps {
   errorCode: number;
@@ -24,17 +23,13 @@ class ErrorPage extends React.Component<ErrorPageProps> {
   }
 
   render() {
-
     var response;
     switch (this.props.errorCode) {
       case 200: // Also display a 404 if someone requests /_error explicitly
       case 404:
         response = (
           <div>
-            <Head>
-              {/* <style dangerouslySetInnerHTML={{__html: Styles}}/> */}
-            </Head>
-            <Container className="pt-5 text-center">
+            <Container cssModule={css} className="pt-5 text-center">
               <h1 className="display-4">Page Not Found</h1>
               <p>The page <strong>{ this.props.router.pathname }</strong> does not exist.</p>
               <p><Link href="/"><a>Home</a></Link></p>
@@ -45,10 +40,7 @@ class ErrorPage extends React.Component<ErrorPageProps> {
       case 500:
         response = (
           <div>
-            <Head>
-              {/* <style dangerouslySetInnerHTML={{__html: Styles}}/> */}
-            </Head>
-            <Container className="pt-5 text-center">
+            <Container cssModule={css} className="pt-5 text-center">
               <h1 className="display-4">Internal Server Error</h1>
               <p>An internal server error occurred.</p>
             </Container>
@@ -58,10 +50,7 @@ class ErrorPage extends React.Component<ErrorPageProps> {
       default:
         response = (
           <div>
-            <Head>
-              {/* <style dangerouslySetInnerHTML={{__html: Styles}}/> */}
-            </Head>
-            <Container className="pt-5 text-center">
+            <Container cssModule={css} className="pt-5 text-center">
               <h1 className="display-4">HTTP { this.props.errorCode } Error</h1>
               <p>
                 An <strong>HTTP { this.props.errorCode }</strong> error occurred while

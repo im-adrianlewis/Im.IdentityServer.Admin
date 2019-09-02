@@ -34,13 +34,6 @@ declare module '*.scss' {
   export = content;
 }
 
-declare module "worker-loader!*" {
-  class WebpackWorker extends Worker {
-    constructor ();
-  }
-  export default WebpackWorker;
-}
-
 declare module '*.graphql' {
   const resource: string
   export = resource
