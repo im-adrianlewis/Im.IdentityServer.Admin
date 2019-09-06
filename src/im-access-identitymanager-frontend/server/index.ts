@@ -319,7 +319,7 @@ nextApp
     expressApp.all('*', (req, res) => {
       const pathName = <string>url.parse(req.url, true).pathname;
       if (pathName === '/service-worker.js') {
-        const filePath = path.join(__dirname, '.next', pathName);
+        const filePath = path.join(__dirname, '..', '.next', pathName);
         return nextApp.serveStatic(req, res, filePath);
       } else {
         const nextRequestHandler = nextApp.getRequestHandler();
