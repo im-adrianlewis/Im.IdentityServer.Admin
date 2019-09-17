@@ -205,6 +205,7 @@ nextApp
     expressApp.use(passport.session());
     createSignInAuthenticate(expressApp, passport, tenants);
     
+    // Setup GraphQL API proxy to avoid manipulating access-token/refresh-token in client-side code
     expressApp.get(
       '/graphql',
       async (req: IncomingMessage, res: ServerResponse) => {
