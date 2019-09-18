@@ -24,17 +24,19 @@ addDecorator(
         backgroundColor: '#eee',
         padding: '0px 5px',
         lineHeight: '2',
-      },
+      }
     },
     inline: true,
-    source: false,
+    source: false
   })
 );
 
 const req = require.context('../stories', true, /.stories.tsx$/);
 
 function loadStories() {
-  req.keys().forEach(req);
+  const allExports = [];
+  req.keys().forEach(fname => allExports.push(req(fname)));
+  return allExports;
 }
 
 configure(loadStories, module);

@@ -11,6 +11,12 @@ module.exports = (api) => {
         {
           'process.env.NODE_ENV': process.env.NODE_ENV
         }
+      ],
+      [
+        'babel-plugin-graphql-tag',
+        {
+          'debug': true
+        }
         // "react-css-modules",
         // {
         
