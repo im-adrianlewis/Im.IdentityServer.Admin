@@ -33,7 +33,6 @@ addDecorator(
   })
 );
 
-
 addParameters({
   docs: {
     container: DocsContainer,
