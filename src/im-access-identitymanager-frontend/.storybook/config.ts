@@ -1,5 +1,7 @@
-import { configure, addDecorator } from '@storybook/react';
+import { configure, addDecorator, addParameters } from '@storybook/react';
+import { DocsPage, DocsContainer } from '@storybook/addon-docs/blocks';
 import { withInfo } from '@storybook/addon-info';
+import { themes } from '@storybook/theming';
 
 // Setup extended information UI styling
 addDecorator(
@@ -31,7 +33,24 @@ addDecorator(
   })
 );
 
-const req = require.context('../stories', true, /.stories.tsx$/);
+
+addParameters({
+  docs: {
+    container: DocsContainer,
+    page: DocsPage,
+  },
+});
+
+addParameters({
+  darkMode: {
+    // Override the default dark theme
+    dark: { ...themes.dark, appBg: 'black' },
+    // Override the default light theme
+    light: { ...themes.normal, appBg: 'white' }
+  }
+});
+
+const req = require.context('../stories', true, /.stories.(ts|tsx|mdx)$/);
 
 function loadStories() {
   const allExports = [];
