@@ -8,7 +8,7 @@ import '@storybook/addon-actions/register';
 import '@storybook/addon-links/register';
 
 // Support for Storybook Notes
-import '@storybook/addon-notes/register';
+//import '@storybook/addon-notes/register';
 
 // Support for Storybook dark-mode toggle
 import 'storybook-dark-mode/register';

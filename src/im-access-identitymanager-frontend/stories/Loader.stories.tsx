@@ -4,6 +4,7 @@ import Loader from '../src/components/Loader';
 
 export default {
   title: 'Layout/Loader',
+  component: Loader,
   decorators: [
     withKnobs
   ],
