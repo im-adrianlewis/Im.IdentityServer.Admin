@@ -14,6 +14,7 @@ using Im.Access.GraphPortal.Data;
 using Im.Access.GraphPortal.Graph;
 using Im.Access.GraphPortal.Graph.Mutations;
 using Im.Access.GraphPortal.Graph.Queries;
+using Im.Access.GraphPortal.Graph.Queries.ClientGroup;
 using Im.Access.GraphPortal.Graph.Queries.UserGroup;
 using Im.Access.GraphPortal.Graph.Subscriptions;
 using Im.Access.GraphPortal.Repositories;
@@ -59,10 +60,21 @@ namespace Im.Access.GraphPortal
             services.AddScoped<UserType>();
             services.AddScoped<UserClaimType>();
 
+            services.AddScoped<ClientQueryType>();
+            services.AddScoped<ClientType>();
+
             services.AddScoped<IUserStore, UserStore>();
             services.AddScoped<IUserRepository, UserRepository>();
 
+            services.AddScoped<IClientStore, ClientStore>();
+            services.AddScoped<IClientRepository, ClientRepository>();
+
             services.AddDbContext<IdentityDbContext>(
+                options =>
+                {
+                    options.UseSqlServer(Configuration["ConnectionStrings:Admin"]);
+                });
+            services.AddDbContext<ConfigurationDbContext>(
                 options =>
                 {
                     options.UseSqlServer(Configuration["ConnectionStrings:Admin"]);

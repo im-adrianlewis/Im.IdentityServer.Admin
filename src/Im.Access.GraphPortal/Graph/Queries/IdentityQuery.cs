@@ -1,6 +1,8 @@
 ﻿using GraphQL;
 using GraphQL.Types;
+using Im.Access.GraphPortal.Graph.Queries.ClientGroup;
 using Im.Access.GraphPortal.Graph.Queries.UserGroup;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Im.Access.GraphPortal.Graph.Queries
 {
@@ -14,11 +16,12 @@ namespace Im.Access.GraphPortal.Graph.Queries
             Field<UserQueryType>(
                 "user",
                 "Access information associated with users.",
-                resolve: fieldContext =>
-                {
-                    return dependencyResolver.Resolve<UserQueryType>();
-                });
+                resolve: fieldContext => dependencyResolver.Resolve<UserQueryType>());
 
+            Field<ClientQueryType>(
+                "client",
+                "Access information associated with clients.",
+                resolve: fieldContext => dependencyResolver.Resolve<ClientQueryType>());
         }
     }
 }
