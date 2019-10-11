@@ -9,12 +9,12 @@ export default class PassportStrategyFactory {
   public getStrategy(
     tenant: string,
     client: oidc.Client,
-    callback: (tokenSet: oidc.TokenSet, userInfo: any, verified: oidc.VerifyCallback) => void): passport.Strategy {
+    callback: (tokenSet: oidc.TokenSet, userInfo: oidc.UserinfoResponse, done: (err: any, user?: any) => void) => void): passport.Strategy {
     
     var strategy = this.knownStrategies[tenant];
 
     if (!strategy) {
-      strategy = new oidc.Strategy({
+      strategy = new oidc.Strategy<any, oidc.Client>({
         client: client,
         params: {
           client_id: 'ImAccessGraph',
@@ -37,7 +37,7 @@ export default class PassportStrategyFactory {
     return strategy;
   }
 
-  private knownStrategies: StringDictionary<oidc.Strategy> = {};
+  private knownStrategies: StringDictionary<oidc.Strategy<any, oidc.Client>> = {};
   private serverUrl: string;
 }
 

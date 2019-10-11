@@ -29,7 +29,7 @@ process.on('unhandledRejection', (reason, p) => {
 
 const strategyFactory = new PassportStrategyFactory(SERVER_URL);
 
-function createUserProfile(tokenSet: oidc.TokenSet, userInfo: any, verified: oidc.VerifyCallback) {
+function createUserProfile(tokenSet: oidc.TokenSet, userInfo: oidc.UserinfoResponse, done: (err: any, user?: any) => void) {
   try {
     console.log(`OIDC verification phase`);
     if (typeof tokenSet === 'undefined' || typeof tokenSet.expires_in === 'undefined')
@@ -55,10 +55,10 @@ function createUserProfile(tokenSet: oidc.TokenSet, userInfo: any, verified: oid
       }
     };
 
-    verified(null, user);
+    done(null, user);
   }
   catch(err) {
-    verified(err, null);
+    done(err, null);
   }
 }
 
