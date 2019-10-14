@@ -1,7 +1,7 @@
 import next from 'next';
 import { DEV, SERVER_HOST, SERVER_URL, SERVER_PORT_HTTP, SERVER_PORT_HTTPS, GRAPHQL_ENDPOINT } from '../src/constants/env';
 import { readFileSync } from 'fs';
-import http, { IncomingMessage, ServerResponse } from 'http';
+import http from 'http';
 import bodyParser from 'body-parser';
 import https from 'https';
 import hsts from 'hsts';
@@ -17,7 +17,7 @@ import tenants from '../src/constants/tenants';
 import PassportStrategyFactory from './passportStrategyFactory';
 import { ParsedUrlQuery } from 'querystring';
 import fetch from 'isomorphic-fetch';
-import moment from 'moment';
+import { User, UserWriter, UserReader } from './user';
 
 process.on('uncaughtException', function(err) {
   console.error('Uncaught Exception: ', err);
@@ -29,7 +29,7 @@ process.on('unhandledRejection', (reason, p) => {
 
 const strategyFactory = new PassportStrategyFactory(SERVER_URL);
 
-function createUserProfile(tokenSet: oidc.TokenSet, userInfo: oidc.UserinfoResponse, done: (err: any, user?: any) => void) {
+function createUserProfile(client: oidc.Client, tokenSet: oidc.TokenSet, userInfo: oidc.UserinfoResponse, done: (err: any, user?: any) => void) {
   try {
     console.log(`OIDC verification phase`);
     if (typeof tokenSet === 'undefined' || typeof tokenSet.expires_in === 'undefined')
@@ -37,24 +37,7 @@ function createUserProfile(tokenSet: oidc.TokenSet, userInfo: oidc.UserinfoRespo
       throw new Error('Invalid token-set.');
     }
 
-    const now = moment.utc();
-    const refreshAfter = now.add(tokenSet.expires_in / 2, 's');
-    const expiresAfter = now.add(tokenSet.expires_in, 's');
-
-    let user = {
-      id: userInfo.sub,
-      displayName: userInfo.displayName,
-      email: userInfo.email,
-      emailVerified: userInfo.email_verified,
-      identity: {
-        accessToken: tokenSet.access_token,
-        refreshToken: tokenSet.refresh_token,
-        idToken: tokenSet.id_token,
-        refreshAfter: refreshAfter.toDate(),
-        expiresAfter: expiresAfter.toDate()
-      }
-    };
-
+    let user = new User(client, tokenSet, userInfo);
     done(null, user);
   }
   catch(err) {
@@ -64,12 +47,17 @@ function createUserProfile(tokenSet: oidc.TokenSet, userInfo: oidc.UserinfoRespo
 
 function createPassportStrategies(passport: passport.PassportStatic, tenants: string[], client: any) {
   tenants.forEach(tenant => {
-    var openIdConnectStrategy = strategyFactory.getStrategy(tenant, client, createUserProfile);
+    var openIdConnectStrategy = strategyFactory.getStrategy(
+      tenant,
+      client,
+      (tokenSet: oidc.TokenSet, userInfo: oidc.UserinfoResponse, done: (err: any, user?: any) => void) =>
+        createUserProfile(client, tokenSet, userInfo, done)
+      );
     passport.use(`OpenIdConnect${tenant}`, openIdConnectStrategy);
   });
 }
 
-function createSignInAuthenticate(expressApp: express.Express, passport: passport.PassportStatic, tenants: string[]) {
+function createSignInEndpoint(expressApp: express.Express, passport: passport.PassportStatic, tenants: string[]) {
   tenants.forEach(tenant => {
     expressApp.get(
       `/auth/signin/${tenant.toLowerCase()}`,
@@ -87,6 +75,16 @@ function createSignInAuthenticate(expressApp: express.Express, passport: passpor
         }
       });
   });
+}
+
+function createSignOutEndpoint(expressApp: express.Express) {
+  expressApp.get(
+    'auth/signout',
+    (req: express.Request, _: express.Response) => {
+      console.log('Processing signout request');
+      req.logOut();
+    }
+  );
 }
 
 // Load environment variables from .env
@@ -145,13 +143,13 @@ nextApp
     };
 
     passport.serializeUser(
-      (user, done: (err: any, cookieData: string) => void) => {
-        const userData = new Buffer(JSON.stringify(user)).toString('base64');
+      (user: User, done: (err: any, cookieData: string) => void) => {
+        const userData = UserWriter.writeTo(user);
         const userHash = getHash(userData);
         done(null, `${userData}:${userHash}`);
       });
     passport.deserializeUser(
-      (cookieData: string, done: (err: any, user: any) => void) => {
+      (cookieData: string, done: (err: any, user: User | null) => void) => {
         if (!cookieData || cookieData.length === 0) {
           done(null, null);
           return;
@@ -170,7 +168,8 @@ nextApp
           return;
         }
 
-        done(null, JSON.parse(new Buffer(userData, 'base64').toString()));
+        var user = UserReader.readFrom(client, userData);
+        done(null, user);
       });
 
     // Static resources
@@ -203,25 +202,24 @@ nextApp
     createPassportStrategies(passport, tenants, client);
     expressApp.use(passport.initialize());
     expressApp.use(passport.session());
-    createSignInAuthenticate(expressApp, passport, tenants);
+    createSignInEndpoint(expressApp, passport, tenants);
+    createSignOutEndpoint(expressApp);
     
     // Setup GraphQL API proxy to avoid manipulating access-token/refresh-token in client-side code
     expressApp.get(
       '/graphql',
-      async (req: IncomingMessage, res: ServerResponse) => {
+      async (req: express.Request, res: express.Response) => {
         if (typeof req.url === 'undefined') {
           return;
         }
 
-        if (!(<any>req).user) {
+        if (!req.user) {
           res.statusCode = 401;
           res.statusMessage = 'Unauthorized';
           res.end();
           return;
         }
       
-        // TODO: Work out how to refresh the access token if we need to
-
         var targetUrl: string = <string>GRAPHQL_ENDPOINT;
         var originalQueryParams: ParsedUrlQuery = url.parse(req.url, true).query;
 
@@ -237,11 +235,15 @@ nextApp
           }
         }
 
+        // Obtain access token from user object (will refresh if needed)
+        var user: User = <User>req.user;
+        var accessToken = await user.getAccessToken();
+
         var subResponse = await fetch(
           targetUrl, {
             method: 'GET',
             headers: {
-              'Authorization': `Bearer ${(<any>req).user.identity.accessToken}`
+              'Authorization': `Bearer ${accessToken}`
             },
             referrer: SERVER_URL
           });
@@ -266,20 +268,18 @@ nextApp
 
     expressApp.post(
       '/graphql', 
-      async (req: IncomingMessage, res: ServerResponse) => {
+      async (req: express.Request, res: express.Response) => {
         if (typeof req.url === 'undefined') {
           return;
         }
 
-        if (!(<any>req).user) {
+        if (!req.user) {
           res.statusCode = 401;
           res.statusMessage = 'Unauthorized';
           res.end();
           return;
         }
       
-        // TODO: Work out how to refresh the access token if we need to
-
         var targetUrl: string = <string>GRAPHQL_ENDPOINT;
         var originalQueryParams: ParsedUrlQuery = url.parse(req.url, true).query;
 
@@ -287,13 +287,17 @@ nextApp
           targetUrl += `?query=${originalQueryParams.query}`;
         }
 
+        // Obtain access token from user object (will refresh if needed)
+        var user: User = <User>req.user;
+        var accessToken = await user.getAccessToken();
+
         var subResponse = await fetch(
           targetUrl, {
             method: 'POST',
             body: '',
             headers: {
               'Content-Type': `${req.headers['content-type']}`,
-              'Authorization': `Bearer ${(<any>req).user.identity.accessToken}`
+              'Authorization': `Bearer ${accessToken}`
             },
             referrer: SERVER_URL
           });
