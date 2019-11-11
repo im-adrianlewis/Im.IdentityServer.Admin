@@ -18,13 +18,12 @@ using Im.Access.GraphPortal.Graph.Queries.ClientGroup;
 using Im.Access.GraphPortal.Graph.Queries.UserGroup;
 using Im.Access.GraphPortal.Graph.Subscriptions;
 using Im.Access.GraphPortal.Repositories;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Logging;
 using Swashbuckle.AspNetCore.Swagger;
 
@@ -81,7 +80,7 @@ namespace Im.Access.GraphPortal
                 });
 
             services
-                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddAuthentication()
                 .AddJwtBearer(
                     options =>
                     {
@@ -95,7 +94,7 @@ namespace Im.Access.GraphPortal
                     {
                         options.InputFormatters.Add(new GraphQlMediaTypeFormatter(false));
                     })
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services
                 .AddGraphQL(
@@ -148,7 +147,7 @@ namespace Im.Access.GraphPortal
                     });
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -164,7 +163,11 @@ namespace Im.Access.GraphPortal
             app.UseHttpsRedirection();
             //app.UseStaticFiles();
             //app.UseCookiePolicy();
+
+            app.UseRouting();
             app.UseAuthentication();
+            app.UseAuthorization();
+
             app.UseWebSockets();
             app.UseGraphQLWebSockets<IdentitySchema>();
             app.UseGraphiQLServer(
@@ -185,6 +188,7 @@ namespace Im.Access.GraphPortal
                     Path = "/ui/voyager",
                     GraphQLEndPoint = "/graphql"
                 });
+
             app.UseSwagger();
             app.UseSwaggerUI(
                 options =>
@@ -196,7 +200,11 @@ namespace Im.Access.GraphPortal
                     options.OAuthScopeSeparator(" ");
                     options.OAuthUseBasicAuthenticationWithAccessCodeGrant();
                 });
-            app.UseMvc();
+            app.UseEndpoints(
+                configure =>
+                {
+                    configure.MapControllers();
+                });
         }
     }
 }

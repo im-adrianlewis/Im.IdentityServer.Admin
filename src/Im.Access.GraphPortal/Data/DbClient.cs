@@ -19,6 +19,7 @@ namespace Im.Access.GraphPortal.Data
         [StringLength(2000)]
         public string ClientUri { get; set; }
 
+        [StringLength(250)]
         public string LogoUri { get; set; }
 
         public bool RequireConsent { get; set; }
@@ -31,6 +32,7 @@ namespace Im.Access.GraphPortal.Data
 
         public bool AllowClientCredentialsOnly { get; set; }
 
+        [StringLength(250)]
         public string LogoutUri { get; set; }
 
         public bool LogoutSessionRequired { get; set; }

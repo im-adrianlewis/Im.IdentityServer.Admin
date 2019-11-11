@@ -156,7 +156,7 @@ namespace Im.Access.GraphPortal.Data
                 .Entity<DbUserClaim>()
                 .ToTable("AspNetUserClaims", "dbo")
                 .HasKey(e => e.Id)
-                .ForSqlServerIsClustered();
+                .IsClustered();
             modelBuilder
                 .Entity<DbUserClaim>()
                 .Property(e => e.Id)

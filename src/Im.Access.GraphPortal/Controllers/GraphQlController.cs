@@ -94,9 +94,7 @@ namespace Im.Access.GraphPortal.Controllers
                 };
             executionOptions.FieldMiddleware.Use<InstrumentFieldsMiddleware>();
 
-            var result = await new QueryOnlyDocumentExecuter()
-                .ExecuteAsync(executionOptions)
-                .ConfigureAwait(true);
+            var result = await new QueryOnlyDocumentExecuter().ExecuteAsync(executionOptions);
 
             result.EnrichWithApolloTracing(startTime);
 
@@ -159,9 +157,7 @@ namespace Im.Access.GraphPortal.Controllers
                 };
             executionOptions.FieldMiddleware.Use<InstrumentFieldsMiddleware>();
 
-            var result = await _documentExecuter
-                .ExecuteAsync(executionOptions)
-                .ConfigureAwait(true);
+            var result = await _documentExecuter.ExecuteAsync(executionOptions);
 
             result.EnrichWithApolloTracing(startTime);
 
