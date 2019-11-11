@@ -1,4 +1,4 @@
-query getself {
+query getSelf {
   users {
     me {
       id

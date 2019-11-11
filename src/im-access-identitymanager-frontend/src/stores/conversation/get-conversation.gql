@@ -1,0 +1,17 @@
+query getConversation($conversationId: ConversationId!) {
+  conversation(conversationId: $conversationId) {
+    id
+    fromPersonaId
+    fromPartyId
+    toPartyId
+    createdWhen
+    lastUpdatedWhen
+    messages {
+      id
+      fromPersonaId
+      fromPartyId
+      messageBody
+      timestamp
+    }
+  }
+}

@@ -6,29 +6,11 @@ import { fetchError, fetchSuccess } from './actions';
 import client from '../linkLayer';
 import { ApolloQueryResult } from 'apollo-client';
 
-const CONVERSATION_QUERY = gql`
-  query GetConversation($conversationId: ConversationId!) {
-    conversation(conversationId: $conversationId) {
-      id
-      fromPersonaId
-      fromPartyId
-      toPartyId
-      createdWhen
-      lastUpdatedWhen
-      messages {
-        id
-        fromPersonaId
-        fromPartyId
-        messageBody
-        timestamp
-      }
-    }
-  }
-`;
+import GET_CONVERSATION_QUERY from './get-conversation.gql';
 
 const clientQuery = (conversationId: string) => 
   client.query<ConversationResponse, ConversationVariables>({
-    query: CONVERSATION_QUERY,
+    query: gql(GET_CONVERSATION_QUERY),
     variables: {
       conversationId
     }

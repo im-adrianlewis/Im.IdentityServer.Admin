@@ -1,5 +1,5 @@
 import next from 'next';
-import { DEV, SERVER_HOST, SERVER_URL, SERVER_PORT_HTTP, SERVER_PORT_HTTPS, GRAPHQL_ENDPOINT } from '../src/constants/env';
+import { DEV, SERVER_HOST, SERVER_URL, SERVER_PORT_HTTP, SERVER_PORT_HTTPS, GRAPHQL_REGULAR_ENDPOINT } from '../src/constants/env';
 import { readFileSync } from 'fs';
 import http from 'http';
 import bodyParser from 'body-parser';
@@ -220,7 +220,7 @@ nextApp
           return;
         }
       
-        var targetUrl: string = <string>GRAPHQL_ENDPOINT;
+        var targetUrl: string = <string>GRAPHQL_REGULAR_ENDPOINT;
         var originalQueryParams: ParsedUrlQuery = url.parse(req.url, true).query;
 
         if (originalQueryParams.query) {
@@ -280,7 +280,7 @@ nextApp
           return;
         }
       
-        var targetUrl: string = <string>GRAPHQL_ENDPOINT;
+        var targetUrl: string = <string>GRAPHQL_REGULAR_ENDPOINT;
         var originalQueryParams: ParsedUrlQuery = url.parse(req.url, true).query;
 
         if (originalQueryParams.query) {

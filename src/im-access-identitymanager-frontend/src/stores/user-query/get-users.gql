@@ -1,4 +1,4 @@
-query getusers($criteria: UserSearchCriteria!) {
+query getUsers($criteria: UserSearchCriteria!) {
   users {
     find(criteria: $criteria) {
       id

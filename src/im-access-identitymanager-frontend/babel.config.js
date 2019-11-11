@@ -21,6 +21,9 @@ module.exports = (api) => {
         // {
         
         // }
+      ],
+      [
+        '@babel/plugin-proposal-nullish-coalescing-operator'
       ]
     ]
   };

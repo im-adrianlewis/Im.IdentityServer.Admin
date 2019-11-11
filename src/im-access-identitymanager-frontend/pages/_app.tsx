@@ -6,6 +6,8 @@ import makeStore from '../src/makeStore';
 import withRedux from 'next-redux-wrapper';
 import withReduxSaga from 'next-redux-saga';
 
+import composeProviders from '../src/providers/provider';
+
 //import { HelmetProvider } from 'react-helmet-async';
 // import NextSeo from 'next-seo';
 // import SEO from '../next-seo.config';
@@ -43,4 +45,6 @@ export class IdentityManagerApp extends App<IdentityManagerAppProps> {
   }
 }
 
-export default withRedux(makeStore)(withReduxSaga(IdentityManagerApp));
+// export default withRedux(makeStore)(withReduxSaga(IdentityManagerApp));
+
+export default composeProviders(IdentityManagerApp);

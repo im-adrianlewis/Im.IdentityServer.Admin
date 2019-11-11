@@ -5,7 +5,7 @@ import css from '../../css/index.scss';
 
 export const Header: React.FunctionComponent = _ =>
   <header>
-    <Container cssModule={css}>
+    <Container cssModule={css} className={css['topbar']}>
       <MainMenu />
     </Container>
   </header>

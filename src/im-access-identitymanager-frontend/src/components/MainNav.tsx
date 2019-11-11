@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Nav, NavItem, NavLink } from 'reactstrap';
+import { NavItem, NavLink } from 'reactstrap';
 import Link from 'next/link';
 import css from '../../css/index.scss';
 
@@ -7,7 +7,7 @@ export class MainNav extends React.Component {
 
   public render() {
     return (
-      <Nav className="mr-auto" navbar cssModule={css}>
+      <>
         <NavItem cssModule={css}>
           <Link href="/">
             <NavLink cssModule={css} href="/">Home</NavLink>
@@ -28,7 +28,7 @@ export class MainNav extends React.Component {
             <NavLink cssModule={css} href="/ModuleCss">Module CSS</NavLink>
           </Link>
         </NavItem>
-      </Nav>
+      </>
     );
   }
 }
