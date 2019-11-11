@@ -43,7 +43,7 @@ namespace Im.Access.GraphPortal.Repositories
                 throw new ArgumentNullException(nameof(searchCriteria));
             }
 
-            if (!CanAccessTenant(user, searchCriteria.TenantId))
+            if (!PermissionCheck.HasAdminPermission(user, searchCriteria.TenantId))
             {
                 // TODO: Strong-type for authorization exception
                 throw new Exception("Access denied");
@@ -59,26 +59,6 @@ namespace Im.Access.GraphPortal.Repositories
                 TotalCount = result.TotalCount,
                 Items = result.Items.Select(e => new UserEntity(e))
             };
-        }
-
-        private bool CanAccessTenant(ClaimsPrincipal user, string tenantId)
-        {
-            if (user.IsInRole("superadmin"))
-            {
-                return true;
-            }
-
-            if (string.IsNullOrWhiteSpace(tenantId))
-            {
-                return false;
-            }
-
-            if (user.IsInRole("admin") && user.HasClaim("Tenant", tenantId))
-            {
-                return true;
-            }
-
-            return false;
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading;
@@ -27,7 +26,20 @@ namespace Im.Access.GraphPortal.Repositories
                 throw new InvalidOperationException("Missing user context");
             }
 
-            return null;
+            if (!PermissionCheck.HasAdminPermission(user, clientSearchCriteria.TenantId))
+            {
+                throw new InvalidOperationException("Access denied");
+            }
+
+            var results = await _clientStore
+                .GetClientsAsync(clientSearchCriteria, cancellationToken);
+            return new PaginationResult<ClientEntity>
+            {
+                PageIndex = results.PageIndex,
+                PageSize = results.PageSize,
+                TotalCount = results.TotalCount,
+                Items = results.Items.Select(i => new ClientEntity(i))
+            };
         }
     }
 }
