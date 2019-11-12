@@ -79,6 +79,14 @@ namespace Im.Access.GraphPortal
                     options.UseSqlServer(Configuration["ConnectionStrings:Admin"]);
                 });
 
+            services.AddHsts(
+                options =>
+                {
+                    var maxAgeText = Configuration["HstsMaxAgeInDays"];
+                    var maxAge = string.IsNullOrEmpty(maxAgeText) ? 30 : int.Parse(maxAgeText);
+                    options.MaxAge = TimeSpan.FromDays(maxAge);
+                });
+
             services
                 .AddAuthentication()
                 .AddJwtBearer(

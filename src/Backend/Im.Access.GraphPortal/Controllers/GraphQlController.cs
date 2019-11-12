@@ -7,7 +7,6 @@ using GraphQL.Instrumentation;
 using GraphQL.Types;
 using GraphQL.Validation.Complexity;
 using Im.Access.GraphPortal.Graph;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Swashbuckle.AspNetCore.Annotations;
@@ -19,7 +18,6 @@ namespace Im.Access.GraphPortal.Controllers
     /// </summary>
     [Route("graphql")]
     [ApiController]
-    // [Authorize]
     public class GraphQlController : Controller
     {
         private readonly IDocumentExecuter _documentExecuter;

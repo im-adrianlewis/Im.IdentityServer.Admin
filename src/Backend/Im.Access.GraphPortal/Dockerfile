@@ -8,7 +8,7 @@ WORKDIR /src
 COPY ["Im.Access.GraphPortal/Im.Access.GraphPortal.csproj" "Im.Access.GraphPortal/"]
 RUN dotnet restore "Im.Access.GraphPortal/Im.Access.GraphPortal.csproj"
 COPY . .
-WORKDIR "/src/Im.Access.GraphPortal"
+WORKDIR /src/Im.Access.GraphPortal
 RUN dotnet build "Im.Access.GraphPortal.csproj" -c Release -o /app
 
 FROM build AS publish
