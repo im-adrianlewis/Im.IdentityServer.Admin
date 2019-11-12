@@ -47,15 +47,27 @@ function PublishToDocker
 
 	switch ($Release)
 	{
-		ReleaseType.Dev { $SemVer = "{0}-dev-{1:yyyyMMddHHmmss}" -f $Version, [DateTime]::UtcNow }
-		ReleaseType.Alpha { $SemVer = "{0}-alpha{1}" -f $Version, $BuildNumber }
-		ReleaseType.Beta { $SemVer = "{0}-beta{1}" -f $Version, $BuildNumber }
+		Dev { $SemVer = "{0}-dev-{1:yyyyMMddHHmmss}" -f $Version, [DateTime]::UtcNow }
+		Alpha { $SemVer = "{0}-alpha{1}" -f $Version, $BuildNumber }
+		Beta { $SemVer = "{0}-beta{1}" -f $Version, $BuildNumber }
 		default { $SemVer = $Version }
 	}
 
 	Write-Host ("Building docker image imadrianlewis/{0}:{1}" -f $Repo, $SemVer)
-	docker build -t imadrianlewis.azurecr.io/${Repo}:${SemVer} -f $PathToDockerfile $PathToContext
-	docker push imadrianlewis.azurecr.io/${Repo}:${SemVer}
+	if ($Release -eq [ReleaseType]::Stable)
+	{
+		docker build -t imadrianlewis.azurecr.io/${Repo}:latest -t imadrianlewis.azurecr.io/${Repo}:${SemVer} -f $PathToDockerfile $PathToContext
+	}
+	else
+	{
+		docker build -t imadrianlewis.azurecr.io/${Repo}:${SemVer} -f $PathToDockerfile $PathToContext
+	}
+
+	if ($LASTEXITCODE -eq 0)
+	{
+		Write-Host ("Pushing docker image to imadrianlewis/{0}" -f $Repo)
+		docker push imadrianlewis.azurecr.io/${Repo}:${SemVer}
+	}
 }
 
 PublishToDocker -Repo "imaccessgraphportal" -Version $Version -Release $Release -BuildNumber $BuildNumber -PathToContext ".\Backend" -PathToDockerfile ".\Backend\Im.Access.GraphPortal\Dockerfile"
