@@ -25,6 +25,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Logging;
+using Polly.Registry;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace Im.Access.GraphPortal
@@ -67,6 +68,14 @@ namespace Im.Access.GraphPortal
 
             services.AddScoped<IClientStore, ClientStore>();
             services.AddScoped<IClientRepository, ClientRepository>();
+
+            services.AddScoped<IPolicyRegistryFactory, PolicyRegistryFactory>();
+            services.AddSingleton<IReadOnlyPolicyRegistry<string>>(
+                provider =>
+                {
+                    var factory = provider.GetRequiredService<IPolicyRegistryFactory>();
+                    return factory.Create();
+                });
 
             services.AddDbContext<IdentityDbContext>(
                 options =>
