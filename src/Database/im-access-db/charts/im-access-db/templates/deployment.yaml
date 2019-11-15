@@ -1,0 +1,194 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "im-access-db.fullname" . }}
+  labels:
+    app: {{ template "im-access-db.name" . }}
+    chart: {{ template "im-access-db.chart" . }}
+    draft: {{ .Values.draft | default "draft-app" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+{{- if .Values.deployment.annotations }}
+  annotations:
+{{ toYaml .Values.deployment.annotations | indent 4 }}
+{{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "im-access-db.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "im-access-db.name" . }}
+        draft: {{ .Values.draft | default "draft-app" }}
+        release: {{ .Release.Name }}
+      annotations:
+        buildID: {{ .Values.buildID | default "" | quote }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: mssql
+              containerPort: {{ .Values.service.port }}
+          volumeMounts:
+            - name: data
+              mountPath: /u01
+            - name: transactionlog
+              mountPath: /u02
+            - name: tempdb
+              mountPath: /u03
+            - name: backup
+              mountPath: /u98 
+            - name: app
+              mountPath: /u00
+          {{- if .Values.probes.enabled }}
+          livenessProbe:
+            tcpSocket:
+               port: mssql
+            initialDelaySeconds: {{ .Values.livenessprobe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessprobe.periodSeconds }}
+          readinessProbe:
+            tcpSocket:
+               port: mssql
+            initialDelaySeconds: {{ .Values.readinessprobe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessprobe.periodSeconds }}
+          {{- end }}
+          env:
+            - name: ACCEPT_EULA
+              value: "{{ .Values.acceptEula.value | upper }}"
+            - name: MSSQL_PID
+              value: "{{ .Values.edition.value }}"
+            - name: MSSQL_SA_PASSWORD
+              valueFrom:
+               secretKeyRef:
+                 name: {{ template "im-access-db.fullname" . }}-sa-secret
+                 key: sapassword
+            - name: MSSQL_USER
+              value: "{{ .Values.usersql.value }}"
+            - name: MSSQL_USER_PASSWORD
+              valueFrom:
+               secretKeyRef:
+                 name: {{ template "im-access-db.fullname" . }}-user-secret
+                 key: userpassword
+            - name: MSSQL_MASTER_DATA_FILE
+              value: /u01/sqlserverdata/mssqlserver/master.mdf
+            - name: MSSQL_MASTER_LOG_FILE
+              value: /u01/sqlserverdata/mssqlserver/mastlog.ldf
+            - name: MSSQL_DATA_DIR
+              value: /u01/sqlserverdata/mssqlserver
+            - name: MSSQL_LOG_DIR
+              value: /u02/sqlserverlog/mssqlserver
+            - name: MSSQL_TEMPDBDATA_DIR
+              value: /u03/sqlservertempdb/mssqlserver
+            - name: MSSQL_TEMPDBLOG_DIR
+              value: /u03/sqlservertempdb/mssqlserver
+            - name: MSSQL_BACKUP_DIR
+              value: /u98/sqlserver/backup/mssqlserver
+            - name: MSSQL_ERROR_LOG
+              value: /u00/app/sqlserver/admin/mssqlserver/log
+            - name: MSSQL_DUMP_DIR
+              value: /u00/app/sqlserver/admin/mssqlserver/dump
+            - name: MSSQL_TCP_PORT
+              value: "{{ .Values.service.port }}"
+            - name: MSSQL_LCID
+              value: "{{ .Values.lcid }}"
+            - name: MSSQL_COLLATION
+              value: "{{ .Values.collation }}"
+            - name: MSSQL_ENABLE_HADR
+              value: "{{ .Values.hadr }}"
+            {{ if .Values.resources.limits.memory }}
+            - name: MSSQL_MEMORY_LIMIT_MB
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+                  divisor: 1Mi
+            {{ end }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      volumes:
+      - name: master
+      {{- if .Values.persistence.enabled }}
+        persistentVolumeClaim:
+          {{- if .Values.persistence.existingMasterClaim }}
+          claimName: {{ .Values.persistence.existingMasterClaim }}
+          {{- else }}
+          claimName: {{ template "im-access-db.fullname" . }}-master
+          {{- end }}
+      {{- else }}
+        emptyDir: {}
+      {{- end }}
+      - name: data
+      {{- if .Values.persistence.enabled }}
+        persistentVolumeClaim:
+          {{- if .Values.persistence.existingDataClaim }}
+          claimName: {{ .Values.persistence.existingDataClaim }}
+          {{- else }}
+          claimName: {{ template "im-access-db.fullname" . }}-data
+          {{- end -}}
+      {{- else }}
+        emptyDir: {}
+      {{- end }}
+      - name: transactionlog
+      {{- if .Values.persistence.enabled }}
+        persistentVolumeClaim:
+          {{- if .Values.persistence.existingTransactionLogClaim }}
+          claimName: {{ .Values.persistence.existingTransactionLogClaim }}
+          {{- else }}
+          claimName: {{ template "im-access-db.fullname" . }}-translog
+          {{- end }}
+      {{- else }}
+        emptyDir: {}
+      {{- end }}
+      - name: tempdb
+      {{- if .Values.persistence.enabled }}
+        persistentVolumeClaim:
+          {{- if .Values.persistence.existingTempdbClaim }}
+          claimName: {{ .Values.persistence.existingTempdbClaim }}
+          {{- else }}
+          claimName: {{ template "im-access-db.fullname" . }}-tempdb
+          {{- end }}
+      {{- else }}
+        emptyDir: {}
+      {{- end }}
+      - name: backup
+      {{- if .Values.persistence.enabled }}
+        persistentVolumeClaim:
+          {{- if .Values.persistence.existingBackupClaim }}
+          claimName: {{ .Values.persistence.existingBackupClaim }}
+          {{- else }}
+          claimName: {{ template "im-access-db.fullname" . }}-backup
+          {{- end }}
+      {{- else }}
+        emptyDir: {}
+      {{- end }}
+      - name: app
+      {{- if .Values.persistence.enabled }}
+        persistentVolumeClaim:
+          {{- if .Values.persistence.existingApppClaim }}
+          claimName: {{ .Values.persistence.existingAppClaim }}
+          {{- else }}
+          claimName: {{ template "im-access-db.fullname" . }}-app
+          {{- end }}
+      {{- else }}
+        emptyDir: {}
+      {{- end }}

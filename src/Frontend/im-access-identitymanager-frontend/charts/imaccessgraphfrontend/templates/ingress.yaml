@@ -1,5 +1,5 @@
 {{- if .Values.ingress.enabled -}}
-{{- $fullName := include "imaccessgraphportal.fullname" . -}}
+{{- $fullName := include "imaccessgraphfrontend.fullname" . -}}
 {{- $servicePort := .Values.service.port -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: extensions/v1beta1
@@ -7,8 +7,8 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
-    app: {{ template "imaccessgraphportal.name" . }}
-    chart: {{ template "imaccessgraphportal.chart" . }}
+    app: {{ template "imaccessgraphfrontend.name" . }}
+    chart: {{ template "imaccessgraphfrontend.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 {{- with .Values.ingress.annotations }}

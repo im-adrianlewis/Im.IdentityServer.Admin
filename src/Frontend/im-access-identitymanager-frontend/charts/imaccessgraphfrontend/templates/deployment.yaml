@@ -1,10 +1,10 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: {{ template "im-access-identitymanager-frontend.fullname" . }}
+  name: {{ template "imaccessgraphfrontend.fullname" . }}
   labels:
-    app: {{ template "im-access-identitymanager-frontend.name" . }}
-    chart: {{ template "im-access-identitymanager-frontend.chart" . }}
+    app: {{ template "imaccessgraphfrontend.name" . }}
+    chart: {{ template "imaccessgraphfrontend.chart" . }}
     draft: {{ .Values.draft | default "draft-app" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -12,12 +12,12 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "im-access-identitymanager-frontend.name" . }}
+      app: {{ template "imaccessgraphfrontend.name" . }}
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "im-access-identitymanager-frontend.name" . }}
+        app: {{ template "imaccessgraphfrontend.name" . }}
         draft: {{ .Values.draft | default "draft-app" }}
         release: {{ .Release.Name }}
       annotations:
@@ -48,7 +48,7 @@ spec:
             - name: {{ $ref }}_{{ $key }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "im-access-identitymanager-frontend.fullname" $root }}-{{ $ref | lower }}
+                  name: {{ template "imaccessgraphfrontend.fullname" $root }}-{{ $ref | lower }}
                   key: {{ $key }}
             {{- end }}
             {{- end }}

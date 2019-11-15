@@ -1,0 +1,6 @@
+acceptEula:
+  value: "Y"
+edition:
+  value: Developer
+usersql:
+  value: "ImAccessService"

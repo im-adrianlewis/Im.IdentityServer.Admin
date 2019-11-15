@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "imaccessgraphportal.fullname" . }}
+  name: {{ template "imaccessgraphfrontend.fullname" . }}
   labels:
-    app: {{ template "imaccessgraphportal.name" . }}
-    chart: {{ template "imaccessgraphportal.chart" . }}
+    app: {{ template "imaccessgraphfrontend.name" . }}
+    chart: {{ template "imaccessgraphfrontend.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
@@ -15,5 +15,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app: {{ template "imaccessgraphportal.name" . }}
+    app: {{ template "imaccessgraphfrontend.name" . }}
     release: {{ .Release.Name }}

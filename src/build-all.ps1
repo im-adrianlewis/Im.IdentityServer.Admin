@@ -70,4 +70,5 @@ function PublishToDocker
 	}
 }
 
-PublishToDocker -Repo "imaccessgraphportal" -Version $Version -Release $Release -BuildNumber $BuildNumber -PathToContext ".\Backend" -PathToDockerfile ".\Backend\Im.Access.GraphPortal\Dockerfile"
+PublishToDocker -Repo "imaccessgraphbackend" -Version $Version -Release $Release -BuildNumber $BuildNumber -PathToContext ".\Backend" -PathToDockerfile ".\Backend\Im.Access.GraphPortal\Dockerfile"
+PublishToDocker -Repo "imaccessgraphfrontend" -Version $Version -Release $Release -BuildNumber $BuildNumber -PathToContext ".\Frontend" -PathToDockerfile ".\Frontend\im-access-identitymanager-frontend\dockerfile"

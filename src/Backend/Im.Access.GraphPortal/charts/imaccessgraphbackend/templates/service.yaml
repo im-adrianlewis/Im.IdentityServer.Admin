@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "im-access-identitymanager-frontend.fullname" . }}
+  name: {{ template "imaccessgraphbackend.fullname" . }}
   labels:
-    app: {{ template "im-access-identitymanager-frontend.name" . }}
-    chart: {{ template "im-access-identitymanager-frontend.chart" . }}
+    app: {{ template "imaccessgraphbackend.name" . }}
+    chart: {{ template "imaccessgraphbackend.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
@@ -15,5 +15,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app: {{ template "im-access-identitymanager-frontend.name" . }}
+    app: {{ template "imaccessgraphbackend.name" . }}
     release: {{ .Release.Name }}

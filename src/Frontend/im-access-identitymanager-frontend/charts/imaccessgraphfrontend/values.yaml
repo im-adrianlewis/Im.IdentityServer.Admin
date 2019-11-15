@@ -1,10 +1,10 @@
-# Default values for im-access-identitymanager-frontend.
+# Default values for imaccessgraphfrontend.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-fullnameOverride: im-access-identitymanager-frontend
+fullnameOverride: imaccessgraphfrontend
 replicaCount: 1
 image:
-  repository: im-access-identitymanager-frontend
+  repository: imaccessgraphfrontend
   tag: stable
   pullPolicy: IfNotPresent
 imagePullSecrets: []

@@ -4,7 +4,7 @@ build:
   context: .
   dockerfile: dockerfile
 install:
-  chart: charts/imaccessgraphfrontend
+  chart: charts/im-access-db
   values:
   - values.dev.yaml?
   - secrets.dev.yaml?
@@ -20,23 +20,18 @@ install:
     #   - name: myRegistryKeySecretName
     replicaCount: 1
     image:
-      repository: imaccessgraphfrontend
+      repository: im-access-db
       tag: $(tag)
       pullPolicy: Never
     ingress:
       annotations:
         kubernetes.io/ingress.class: traefik-azds
       hosts:
-      # This expands to form the service's public URL: [space.s.][rootSpace.]im-access-identitymanager-frontend.<random suffix>.<region>.azds.io
-      # Customize the public URL by changing the 'im-access-identitymanager-frontend' text between the $(rootSpacePrefix) and $(hostSuffix) tokens
+      # This expands to form the service's public URL: [space.s.][rootSpace.]im-access-db.<random suffix>.<region>.azds.io
+      # Customize the public URL by changing the 'im-access-db' text between the $(rootSpacePrefix) and $(hostSuffix) tokens
       # For more information see https://aka.ms/devspaces/routing
-      - $(spacePrefix)$(rootSpacePrefix)imaccessgraphfrontend$(hostSuffix)
+      - $(spacePrefix)$(rootSpacePrefix)imaccessdb$(hostSuffix)
 configurations:
   develop:
     build:
       useGitIgnore: true
-    container:
-      sync:
-      - "!**/package.json"
-      iterate:
-        processesToKill: [node]
