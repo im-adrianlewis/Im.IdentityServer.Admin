@@ -54,10 +54,10 @@ namespace Im.Access.GraphPortal.Repositories
                 // Circuit breaker: fails only on SQL Server transient exceptions
                 sqlServerCircuitBreakerPolicy,
 
-                // Timeout: 
-                Policy
-                    .TimeoutAsync(5),
+                // Timeout: 5 seconds per try - long running queries go elsewhere
+                Policy.TimeoutAsync(5),
 
+                // Bulkhead: At most 20 simultaneous threads
                 sqlServerBulkheadPolicy));
 
             registry.Add("HttpRetryWithJitter", Policy

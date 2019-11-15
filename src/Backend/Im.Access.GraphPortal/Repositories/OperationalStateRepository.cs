@@ -1,30 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using GraphQL;
+using Polly.CircuitBreaker;
+using Polly.Registry;
 
 namespace Im.Access.GraphPortal.Repositories
 {
-    public interface IOperationalStateRepository
-    {
-        Task<IEnumerable<CircuitBreakerEntity>> GetCircuitBreakersAsync(ClaimsPrincipal user,
-            string filter,
-            CancellationToken cancellationToken);
-    }
-
     public class OperationalStateRepository : IOperationalStateRepository
     {
-        public async Task<IEnumerable<CircuitBreakerEntity>> GetCircuitBreakersAsync(ClaimsPrincipal user, string filter, CancellationToken cancellationToken)
+        private readonly IReadOnlyPolicyRegistry<string> _policyRegistry;
+
+        public OperationalStateRepository(IReadOnlyPolicyRegistry<string> policyRegistry)
         {
-            throw new NotImplementedException();
+            _policyRegistry = policyRegistry;
         }
-    }
 
-    public class CircuitBreakerEntity
-    {
-        public string Name { get; set; }
-
-        public string State { get; set; }
+        public Task<IEnumerable<CircuitBreakerEntity>> GetCircuitBreakersAsync(ClaimsPrincipal user, string filter, CancellationToken cancellationToken)
+        {
+            var entities = _policyRegistry
+                .Select(pair =>
+                    new
+                    {
+                        Name = pair.Key,
+                        Policy = pair.Value.As<ICircuitBreakerPolicy>()
+                    })
+                .Where(pair => pair.Policy != null)
+                .Select(pair =>
+                    new CircuitBreakerEntity
+                    {
+                        Name = pair.Name,
+                        State = pair.Policy.CircuitState.ToString()
+                    });
+            return Task.FromResult(entities);
+        }
     }
 }

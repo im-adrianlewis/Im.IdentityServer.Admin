@@ -59,15 +59,15 @@ namespace Im.Access.GraphPortal
             services.AddScoped<UserSearchCriteriaType>();
             services.AddScoped<UserType>();
             services.AddScoped<UserClaimType>();
-
             services.AddScoped<ClientQueryType>();
             services.AddScoped<ClientType>();
+            
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IClientRepository, ClientRepository>();
+            services.AddScoped<IOperationalStateRepository, OperationalStateRepository>();
 
             services.AddScoped<IUserStore, UserStore>();
-            services.AddScoped<IUserRepository, UserRepository>();
-
             services.AddScoped<IClientStore, ClientStore>();
-            services.AddScoped<IClientRepository, ClientRepository>();
 
             services.AddScoped<IPolicyRegistryFactory, PolicyRegistryFactory>();
             services.AddSingleton<IReadOnlyPolicyRegistry<string>>(
