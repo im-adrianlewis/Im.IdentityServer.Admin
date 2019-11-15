@@ -8,15 +8,15 @@ using GraphQL.Server;
 using GraphQL.Server.Ui.GraphiQL;
 using GraphQL.Server.Ui.Playground;
 using GraphQL.Server.Ui.Voyager;
-using GraphQL.Types;
 using GraphQL.Types.Relay;
 using Im.Access.GraphPortal.Data;
 using Im.Access.GraphPortal.Graph;
-using Im.Access.GraphPortal.Graph.Mutations;
-using Im.Access.GraphPortal.Graph.Queries;
-using Im.Access.GraphPortal.Graph.Queries.ClientGroup;
-using Im.Access.GraphPortal.Graph.Queries.UserGroup;
-using Im.Access.GraphPortal.Graph.Subscriptions;
+using Im.Access.GraphPortal.Graph.ClientGroup.Queries;
+using Im.Access.GraphPortal.Graph.Common.Queries;
+using Im.Access.GraphPortal.Graph.OperationalGroup;
+using Im.Access.GraphPortal.Graph.OperationalGroup.Mutations;
+using Im.Access.GraphPortal.Graph.OperationalGroup.Queries;
+using Im.Access.GraphPortal.Graph.UserGroup.Queries;
 using Im.Access.GraphPortal.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
@@ -25,8 +25,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.OpenApi.Models;
 using Polly.Registry;
-using Swashbuckle.AspNetCore.Swagger;
 
 namespace Im.Access.GraphPortal
 {
@@ -46,7 +46,7 @@ namespace Im.Access.GraphPortal
             services.AddScoped<IDocumentExecuter, DocumentExecuter>();
             services.AddScoped<IDocumentWriter>(_ => new DocumentWriter(true));
 
-            services.AddScoped<ISchema, IdentitySchema>();
+            services.AddScoped<IdentitySchema>();
             services.AddScoped(typeof(ConnectionType<>));
             services.AddScoped(typeof(EdgeType<>));
             services.AddScoped<PageInfoType>();
@@ -61,6 +61,11 @@ namespace Im.Access.GraphPortal
             services.AddScoped<UserClaimType>();
             services.AddScoped<ClientQueryType>();
             services.AddScoped<ClientType>();
+            services.AddScoped<OperationalQueryType>();
+            services.AddScoped<OperationalMutationType>();
+            services.AddScoped<CircuitBreakerType>();
+            services.AddScoped<CircuitBreakerInputType>();
+            services.AddScoped<CircuitBreakerInputStateEnum>();
             
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IClientRepository, ClientRepository>();
@@ -69,7 +74,7 @@ namespace Im.Access.GraphPortal
             services.AddScoped<IUserStore, UserStore>();
             services.AddScoped<IClientStore, ClientStore>();
 
-            services.AddScoped<IPolicyRegistryFactory, PolicyRegistryFactory>();
+            services.AddSingleton<IPolicyRegistryFactory, PolicyRegistryFactory>();
             services.AddSingleton<IReadOnlyPolicyRegistry<string>>(
                 provider =>
                 {
@@ -111,6 +116,7 @@ namespace Im.Access.GraphPortal
                     {
                         options.InputFormatters.Add(new GraphQlMediaTypeFormatter(false));
                     })
+                .AddNewtonsoftJson()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services
@@ -128,7 +134,7 @@ namespace Im.Access.GraphPortal
                     {
                         options.SwaggerDoc(
                             "v1",
-                            new Info
+                            new OpenApiInfo
                             {
                                 Version = "v1",
                                 Title = "Im Access API",
@@ -141,26 +147,30 @@ namespace Im.Access.GraphPortal
 
                         options.AddSecurityDefinition(
                             "oauth2",
-                            new OAuth2Scheme
+                            new OpenApiSecurityScheme
                             {
-                                Type = "oauth2",
-                                Flow = "implicit",
-                                AuthorizationUrl = $"{Configuration["IdentityServer"]}/connect/authorize",
-                                TokenUrl = $"{Configuration["IdentityServer"]}/connect/token",
-                                Scopes =
-                                    new Dictionary<string, string>
+                                Type = SecuritySchemeType.OAuth2,
+                                Flows = new OpenApiOAuthFlows
+                                {
+                                    Implicit = new OpenApiOAuthFlow
                                     {
-                                        { "im-access-graph-api_user:manage", "Graph API access to users with manage permissions." },
-                                        { "im-access-graph-api_user:read", "Graph API access to users with read permissions." },
-                                        { "im-access-graph-api_client:manage", "Graph API access to clients with manage permissions." },
-                                        { "im-access-graph-api_client:read", "Graph API access to clients with read permissions." }
+                                        AuthorizationUrl = new Uri($"{Configuration["IdentityServer"]}/connect/authorize"),
+                                        TokenUrl = new Uri($"{Configuration["IdentityServer"]}/connect/token"),
+                                        Scopes =
+                                            new Dictionary<string, string>
+                                            {
+                                                { "im-access-graph-api_user:manage", "Graph API access to users with manage permissions." },
+                                                { "im-access-graph-api_user:read", "Graph API access to users with read permissions." },
+                                                { "im-access-graph-api_client:manage", "Graph API access to clients with manage permissions." },
+                                                { "im-access-graph-api_client:read", "Graph API access to clients with read permissions." }
+                                            }
                                     }
+                                }
                             });
-                        options.AddSecurityRequirement(
-                            new Dictionary<string, IEnumerable<string>>
-                            {
-                                { "oauth2", new string[0] }
-                            });
+                        //options.AddSecurityRequirement(
+                        //    new OpenApiSecurityRequirement
+                        //    {
+                        //    });
                     });
         }
 

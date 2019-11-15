@@ -7,8 +7,14 @@ namespace Im.Access.GraphPortal.Repositories
 {
     public interface IOperationalStateRepository
     {
-        Task<IEnumerable<CircuitBreakerEntity>> GetCircuitBreakersAsync(ClaimsPrincipal user,
+        Task<IEnumerable<CircuitBreakerEntity>> GetCircuitBreakersAsync(
+            ClaimsPrincipal user,
             string filter,
+            CancellationToken cancellationToken);
+
+        Task<CircuitBreakerEntity> UpdateCircuitBreaker(
+            ClaimsPrincipal user,
+            CircuitBreakerInput breaker,
             CancellationToken cancellationToken);
     }
 }

@@ -1,8 +1,5 @@
 ﻿using GraphQL;
 using GraphQL.Types;
-using Im.Access.GraphPortal.Graph.Mutations;
-using Im.Access.GraphPortal.Graph.Queries;
-using Im.Access.GraphPortal.Graph.Subscriptions;
 
 namespace Im.Access.GraphPortal.Graph
 {
@@ -11,7 +8,7 @@ namespace Im.Access.GraphPortal.Graph
         public IdentitySchema(IDependencyResolver dependencyResolver) : base(dependencyResolver)
         {
             Query = dependencyResolver.Resolve<IdentityQuery>();
-            //Mutation = dependencyResolver.Resolve<IdentityMutation>();
+            Mutation = dependencyResolver.Resolve<IdentityMutation>();
             //Subscription = dependencyResolver.Resolve<IdentitySubscription>();
         }
     }

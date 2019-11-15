@@ -8,6 +8,7 @@ using GraphQL.Types;
 using GraphQL.Validation.Complexity;
 using Im.Access.GraphPortal.Graph;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -25,7 +26,7 @@ namespace Im.Access.GraphPortal.Controllers
         private readonly IDictionary<string, string> _namedQueries =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-        public GraphQlController(ISchema schema, IDocumentExecuter documentExecuter)
+        public GraphQlController(IdentitySchema schema, IDocumentExecuter documentExecuter)
         {
             _schema = schema;
             _documentExecuter = documentExecuter;
@@ -96,7 +97,9 @@ namespace Im.Access.GraphPortal.Controllers
 
             result.EnrichWithApolloTracing(startTime);
 
-            return result.Errors?.Count > 0 ? (IActionResult)BadRequest(result) : Json(result);
+            return result.Errors?.Count > 0
+                ? (IActionResult)BadRequest(result)
+                : Json(result, new JsonSerializerSettings { MaxDepth = 64 });
         }
 
         /// <summary>
@@ -159,7 +162,9 @@ namespace Im.Access.GraphPortal.Controllers
 
             result.EnrichWithApolloTracing(startTime);
 
-            return result.Errors?.Count > 0 ? (IActionResult) BadRequest(result) : Json(result);
+            return result.Errors?.Count > 0 
+                ? (IActionResult) BadRequest(result)
+                : Json(result, new JsonSerializerSettings { MaxDepth = 64 });
         }
     }
 }

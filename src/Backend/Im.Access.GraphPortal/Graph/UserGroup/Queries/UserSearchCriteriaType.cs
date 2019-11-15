@@ -2,7 +2,7 @@
 using GraphQL.Types;
 using Im.Access.GraphPortal.Repositories;
 
-namespace Im.Access.GraphPortal.Graph.Queries.UserGroup
+namespace Im.Access.GraphPortal.Graph.UserGroup.Queries
 {
     public class UserSearchCriteriaType : InputObjectGraphType<UserSearchCriteria>
     {

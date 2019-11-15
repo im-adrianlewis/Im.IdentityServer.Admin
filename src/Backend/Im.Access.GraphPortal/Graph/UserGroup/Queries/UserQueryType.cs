@@ -1,8 +1,9 @@
 ﻿using System.Security.Claims;
 using GraphQL.Types;
+using Im.Access.GraphPortal.Graph.Common.Queries;
 using Im.Access.GraphPortal.Repositories;
 
-namespace Im.Access.GraphPortal.Graph.Queries.UserGroup
+namespace Im.Access.GraphPortal.Graph.UserGroup.Queries
 {
     public class UserQueryType : ObjectGraphType
     {

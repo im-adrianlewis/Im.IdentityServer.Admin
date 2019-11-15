@@ -14,10 +14,10 @@ namespace Im.Access.GraphPortal.Repositories
 {
     public class PolicyRegistryFactory : IPolicyRegistryFactory
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<PolicyRegistryFactory> _logger;
         private readonly IConfiguration _configuration;
 
-        public PolicyRegistryFactory(ILogger logger, IConfiguration configuration)
+        public PolicyRegistryFactory(ILogger<PolicyRegistryFactory> logger, IConfiguration configuration)
         {
             _logger = logger;
             _configuration = configuration;

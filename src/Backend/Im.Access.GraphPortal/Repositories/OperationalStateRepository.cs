@@ -5,6 +5,8 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using GraphQL;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Polly.CircuitBreaker;
 using Polly.Registry;
 
@@ -36,6 +38,31 @@ namespace Im.Access.GraphPortal.Repositories
                         State = pair.Policy.CircuitState.ToString()
                     });
             return Task.FromResult(entities);
+        }
+
+        public Task<CircuitBreakerEntity> UpdateCircuitBreaker(ClaimsPrincipal user, CircuitBreakerInput breaker, CancellationToken cancellationToken)
+        {
+            ICircuitBreakerPolicy policy;
+            if (!_policyRegistry.TryGet(breaker.Name, out policy))
+            {
+                throw new Exception("Circuit breaker policy not found");
+            }
+
+            if (breaker.State == CircuitBreakerInputState.Isolate)
+            {
+                policy.Isolate();
+            }
+            else if (breaker.State == CircuitBreakerInputState.Reset)
+            {
+                policy.Reset();
+            }
+
+            return Task.FromResult(
+                new CircuitBreakerEntity
+                {
+                    Name = breaker.Name,
+                    State = policy.CircuitState.ToString()
+                });
         }
     }
 }
