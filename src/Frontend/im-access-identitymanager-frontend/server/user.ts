@@ -20,6 +20,16 @@ export class UserIdentity {
   readonly expiresAfter: moment.Moment;
 }
 
+export class AccessToken {
+  constructor(token: string, refreshAfter: Date) {
+    this.token = token;
+    this.refreshAfter = refreshAfter;
+  }
+
+  readonly token: string;
+  readonly refreshAfter: Date;
+}
+
 export class User {
   constructor(client: Client, tokenSet: TokenSet, userInfo: UserinfoResponse) {
     this._client = client;
@@ -48,14 +58,16 @@ export class User {
     return this._tokenSet;
   }
 
-  async getAccessToken(): Promise<string> {
+  async getAccessToken(): Promise<AccessToken> {
     await this.refreshAccessTokenIfNeeded();
-    return this._identity.accessToken;
+    return new AccessToken(
+      this._identity.accessToken,
+      this._identity.refreshAfter.toDate());
   }
 
   async refreshAccessTokenIfNeeded(): Promise<void> {
     if (this._identity.refreshToken !== '' && this._identity.refreshAfter < moment.utc()) {
-      var tokenSet = await this._client.refresh(this._identity.refreshToken);
+      var tokenSet = await this._client.refresh(this._identity.refreshToken);      
 
       this._tokenSet = tokenSet;
       this._identity = new UserIdentity(tokenSet);

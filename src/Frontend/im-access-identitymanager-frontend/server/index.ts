@@ -205,120 +205,27 @@ nextApp
     createSignInEndpoint(expressApp, passport, tenants);
     createSignOutEndpoint(expressApp);
     
-    // Setup GraphQL API proxy to avoid manipulating access-token/refresh-token in client-side code
-    expressApp.get(
-      '/graphql',
-      async (req: express.Request, res: express.Response) => {
-        if (typeof req.url === 'undefined') {
-          return;
-        }
-
-        if (!req.user) {
-          res.statusCode = 401;
-          res.statusMessage = 'Unauthorized';
-          res.end();
-          return;
-        }
-      
-        var targetUrl: string = <string>GRAPHQL_REGULAR_ENDPOINT;
-        var originalQueryParams: ParsedUrlQuery = url.parse(req.url, true).query;
-
-        if (originalQueryParams.query) {
-          targetUrl += `?query=${originalQueryParams.query}`;
-
-          if (originalQueryParams.variables) {
-            targetUrl += `&variables=${originalQueryParams.variables}`;
-          }
-
-          if (originalQueryParams.operationName) {
-            targetUrl += `&operationName=${originalQueryParams.operationName}`;
-          }
-        }
-
-        // Obtain access token from user object (will refresh if needed)
-        var user: User = <User>req.user;
-        var accessToken = await user.getAccessToken();
-
-        var subResponse = await fetch(
-          targetUrl, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${accessToken}`
-            },
-            referrer: SERVER_URL
-          });
-
-        res.writeHead(
-          subResponse.status,
-          subResponse.statusText, {
-            'Content-Type': `${subResponse.headers.get('Content-Type')}`,
-            'Content-Length': `${subResponse.headers.get('Content-Length')}`
-          });
-          
-        if (subResponse.body != null) {
-          var reader = (<any>subResponse.body).readableBuffer.head;
-          while (reader !== null) {
-            res.write(reader.data);
-            reader = reader.next;
-          }
-        }
-
-        res.end();
-      });
-
+    // Rather than require a GraphQL proxy, let us instead provide an endpoint that can be called
+    //  to get an up-to-date access token/expiry date combo whenever needed. This will still keep
+    //  the refresh token on the server side...
     expressApp.post(
-      '/graphql', 
+      '/token',
       async (req: express.Request, res: express.Response) => {
-        if (typeof req.url === 'undefined') {
-          return;
-        }
-
         if (!req.user) {
           res.statusCode = 401;
           res.statusMessage = 'Unauthorized';
           res.end();
           return;
         }
-      
-        var targetUrl: string = <string>GRAPHQL_REGULAR_ENDPOINT;
-        var originalQueryParams: ParsedUrlQuery = url.parse(req.url, true).query;
 
-        if (originalQueryParams.query) {
-          targetUrl += `?query=${originalQueryParams.query}`;
-        }
-
-        // Obtain access token from user object (will refresh if needed)
         var user: User = <User>req.user;
-        var accessToken = await user.getAccessToken();
-
-        var subResponse = await fetch(
-          targetUrl, {
-            method: 'POST',
-            body: '',
-            headers: {
-              'Content-Type': `${req.headers['content-type']}`,
-              'Authorization': `Bearer ${accessToken}`
-            },
-            referrer: SERVER_URL
-          });
-
-        res.writeHead(
-          subResponse.status,
-          subResponse.statusText, {
-            'Content-Type': `${subResponse.headers.get('Content-Type')}`,
-            'Content-Length': `${subResponse.headers.get('Content-Length')}`
-          });
-      
-        if (subResponse.body !== null) {
-          var reader = (<any>subResponse.body).readableBuffer.head;
-          while (reader !== null) {
-            res.write(reader.data);
-            reader = reader.next;
-          }
-        }
-
+        var result = await user.getAccessToken();
+        res.statusCode = 200;
+        res.contentType('application/json');
+        res.write(JSON.stringify(result));
         res.end();
-      });
+      }
+    )
 
     // Catch-all handler to allow Next.js to handle all other routes
     expressApp.all('*', (req, res) => {
