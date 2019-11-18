@@ -1,5 +1,5 @@
 import next from 'next';
-import { DEV, SERVER_HOST, SERVER_URL, SERVER_PORT_HTTP, SERVER_PORT_HTTPS, GRAPHQL_REGULAR_ENDPOINT } from '../src/constants/env';
+import { DEV, SERVER_HOST, SERVER_URL, SERVER_PORT_HTTP, SERVER_PORT_HTTPS } from '../src/constants/env';
 import { readFileSync } from 'fs';
 import http from 'http';
 import bodyParser from 'body-parser';
@@ -15,8 +15,6 @@ import oidc from 'openid-client';
 import crypto from 'crypto';
 import tenants from '../src/constants/tenants';
 import PassportStrategyFactory from './passportStrategyFactory';
-import { ParsedUrlQuery } from 'querystring';
-import fetch from 'isomorphic-fetch';
 import { User, UserWriter, UserReader } from './user';
 
 process.on('uncaughtException', function(err) {
