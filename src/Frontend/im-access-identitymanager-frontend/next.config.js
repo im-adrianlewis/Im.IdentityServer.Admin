@@ -3,6 +3,21 @@ const withSass = require('@zeit/next-sass');
 const withGraphql = require('next-plugin-graphql');
 const withOffline = require('next-offline');
 
+const frontEndEnvKeys = [
+  'IDENTITY_URL',
+  'IDENTITY_CLIENT_ID',
+  'GRAPHQI_REGULAR_URI',
+  'GRAPHQI_SUBSCRIPTIONS_URI'
+];
+
+const envPlugin = frontEndEnvKeys.reduce(
+  (result, key) => 
+    Object.assign({}, result, {
+      [`process.env.${key}`]: JSON.stringify(process.env[key])
+    }),
+  {}
+);
+
 module.exports = withGraphql(withOffline(withSass({
   webpack(config, { buildId, dev, isServer, defaultLoaders, webpack }) {
     const csTarget = isServer ? 'server-side' : 'client-side';
@@ -18,6 +33,7 @@ module.exports = withGraphql(withOffline(withSass({
     }
 
     config.node = { fs: 'empty' };
+    config.plugins.push(new webpack.DefinePlugin(envPlugin));
     return config;
   },
   // webpackDevMiddleware(config) {

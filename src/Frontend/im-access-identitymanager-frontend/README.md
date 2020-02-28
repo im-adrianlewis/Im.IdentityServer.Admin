@@ -3,7 +3,8 @@
 ![samples](assets/samples.png)
 
 ### Latest update
-- typescript@3.3.3, next@8.0.0, react@16.8
+- nodejs@13.9.0
+- typescript@3.8.2, next@9.2.2, react@16.13
 
 ## Feature
  - TypeScript

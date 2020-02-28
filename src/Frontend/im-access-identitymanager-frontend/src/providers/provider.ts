@@ -6,7 +6,7 @@ import App from 'next/app';
 
 const providers = compose<App, App>(
   withRedux(makeStore),
-  withReduxSaga({ async: true })
+  withReduxSaga
 );
 
 export default providers;
