@@ -195,8 +195,13 @@ namespace Im.Access.GraphPortal
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseWebSockets();
-            app.UseGraphQLWebSockets<IdentitySchema>();
+            app.UseWebSockets(
+                new WebSocketOptions
+                {
+                    KeepAliveInterval = TimeSpan.FromMinutes(30),
+                    ReceiveBufferSize = 4096
+                });
+            app.UseGraphQLWebSockets<IdentitySchema>("/graphql");
             app.UseGraphiQLServer(
                 new GraphiQLOptions
                 {
