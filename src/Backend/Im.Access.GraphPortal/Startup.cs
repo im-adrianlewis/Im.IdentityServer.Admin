@@ -16,6 +16,7 @@ using Im.Access.GraphPortal.Graph.Common.Queries;
 using Im.Access.GraphPortal.Graph.OperationalGroup;
 using Im.Access.GraphPortal.Graph.OperationalGroup.Mutations;
 using Im.Access.GraphPortal.Graph.OperationalGroup.Queries;
+using Im.Access.GraphPortal.Graph.OperationalGroup.Subscriptions;
 using Im.Access.GraphPortal.Graph.UserGroup.Queries;
 using Im.Access.GraphPortal.Repositories;
 using Microsoft.AspNetCore.Builder;
@@ -63,9 +64,11 @@ namespace Im.Access.GraphPortal
             services.AddScoped<ClientType>();
             services.AddScoped<OperationalQueryType>();
             services.AddScoped<OperationalMutationType>();
+            services.AddScoped<OperationalSubscriptionType>();
             services.AddScoped<CircuitBreakerType>();
             services.AddScoped<CircuitBreakerInputType>();
             services.AddScoped<CircuitBreakerInputStateEnum>();
+            services.AddScoped<CircuitBreakerSubscriptions>();
             
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IClientRepository, ClientRepository>();

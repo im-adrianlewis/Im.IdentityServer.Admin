@@ -9,7 +9,7 @@ namespace Im.Access.GraphPortal.Graph
         {
             Query = dependencyResolver.Resolve<IdentityQuery>();
             Mutation = dependencyResolver.Resolve<IdentityMutation>();
-            //Subscription = dependencyResolver.Resolve<IdentitySubscription>();
+            Subscription = dependencyResolver.Resolve<IdentitySubscription>();
         }
     }
 }
