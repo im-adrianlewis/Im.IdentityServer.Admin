@@ -2,6 +2,7 @@ import 'isomorphic-fetch';
 import * as React from 'react';
 import { Provider } from 'react-redux';
 import App, { AppContext } from 'next/app';
+import '../css/index.scss';
 import makeStore from '../src/makeStore';
 import withRedux from 'next-redux-wrapper';
 import withReduxSaga from 'next-redux-saga';

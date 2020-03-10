@@ -1,9 +1,7 @@
 import * as React from 'react';
-import classNames from 'classnames';
-import css from '../../css/index.scss';
 
 export const Home: React.FunctionComponent = _ =>
-  <div className={classNames('test', css.home)}>
+  <div>
     <ul>
       <li>
         usage classnames in Home.tsx

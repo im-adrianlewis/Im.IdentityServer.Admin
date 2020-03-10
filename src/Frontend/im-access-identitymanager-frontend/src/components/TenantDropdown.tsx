@@ -1,7 +1,6 @@
 import * as react from 'react';
 import { Dropdown, DropdownItem, DropdownToggle, DropdownMenu } from 'reactstrap';
 import tenants from '../constants/tenants';
-import css from '../../css/index.scss';
 
 interface TenantDropdownProps {
   id?: string | undefined;
@@ -33,7 +32,7 @@ class TenantDropdown extends react.Component<TenantDropdownProps, TenantDropdown
       .filter(tenant => tenant !== 'Immediate')
       .map(tenant =>
       (
-        <DropdownItem cssModule={css}
+        <DropdownItem 
             key={tenant}
             active={this.state.selectedTenant === tenant}
             onClick={() => boundSelectedTenant(tenant)}>
@@ -46,17 +45,17 @@ class TenantDropdown extends react.Component<TenantDropdownProps, TenantDropdown
       : 'Select brand';
 
     return (
-      <Dropdown id={this.props.id} cssModule={css} isOpen={this.state.dropdownOpen} toggle={this.toggle.bind(this)} setActiveFromChild>
-        <DropdownToggle cssModule={css} caret>{toggleMessage}</DropdownToggle>
-        <DropdownMenu cssModule={css}>
-          <DropdownItem cssModule={css} header>Brand</DropdownItem>
-          <DropdownItem cssModule={css} 
+      <Dropdown id={this.props.id} isOpen={this.state.dropdownOpen} toggle={this.toggle.bind(this)} setActiveFromChild>
+        <DropdownToggle caret>{toggleMessage}</DropdownToggle>
+        <DropdownMenu>
+          <DropdownItem header>Brand</DropdownItem>
+          <DropdownItem 
               key="Immediate"
               active={this.state.selectedTenant === 'Immediate'}
               onClick={() => boundSelectedTenant('Immediate')}>
             Immediate
           </DropdownItem>
-          <DropdownItem cssModule={css} divider />
+          <DropdownItem divider />
           {items}
         </DropdownMenu>
       </Dropdown>

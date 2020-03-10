@@ -3,7 +3,6 @@ import {Header} from './Header';
 import {Main} from './Main';
 import {Footer} from './Footer';
 import Head from 'next/head';
-//import css from '../../css/index.scss';
 
 interface LayoutProps {
   showNavMenu: boolean;

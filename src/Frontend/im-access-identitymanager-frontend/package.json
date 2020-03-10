@@ -22,8 +22,6 @@
     "build-docker": "docker build -t zenglobal/im-access-identitymanager-frontend ."
   },
   "dependencies": {
-    "@zeit/next-css": "^0.2.1-canary.4",
-    "@zeit/next-sass": "^0.2.1-canary.4",
     "apollo-boost": "^0.4.7",
     "apollo-client": "^2.6.8",
     "apollo-link": "^1.2.13",

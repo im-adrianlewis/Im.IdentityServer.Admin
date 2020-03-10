@@ -1,5 +1,4 @@
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-const withSass = require('@zeit/next-sass');
 const withGraphql = require('next-plugin-graphql');
 const withOffline = require('next-offline');
 
@@ -18,7 +17,7 @@ const envPlugin = frontEndEnvKeys.reduce(
   {}
 );
 
-module.exports = withGraphql(withOffline(withSass({
+module.exports = withGraphql(withOffline({
   webpack(config, { buildId, dev, isServer, defaultLoaders, webpack }) {
     const csTarget = isServer ? 'server-side' : 'client-side';
     const environment = dev ? 'DEV environment' : 'PROD environment';
@@ -52,4 +51,4 @@ module.exports = withGraphql(withOffline(withSass({
     // Fallback to default build id generation
     return null;
   }
-})));
+}));

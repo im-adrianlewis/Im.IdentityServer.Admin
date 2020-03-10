@@ -1,8 +1,6 @@
 import * as React from 'react';
 import { NavItem, NavLink } from 'reactstrap';
 import Link from 'next/link';
-import css from '../../css/index.scss';
-import classNames from 'classnames';
 
 export class AccountNav extends React.Component {
 
@@ -16,9 +14,9 @@ export class AccountNav extends React.Component {
   
   private renderForUnauthenticated() {
     return (
-      <NavItem cssModule={css}>
+      <NavItem>
         <Link href="/auth/signin">
-          <NavLink cssModule={css} href="/auth/signin">Sign In</NavLink>
+          <NavLink href="/auth/signin">Sign In</NavLink>
         </Link>
       </NavItem>
     );
@@ -26,14 +24,14 @@ export class AccountNav extends React.Component {
 
   private renderForAuthenticated() {
     return (
-      <NavItem cssModule={css} className={classNames(css['dropdown'], css['no-arrow'])}>
-        <a className={classNames(css['nav-link'], css['dropdown-toggle'])} href="#" id="accountDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <span className={classNames(css['mr-2'], css['d-none'], css['d-lg-inline'], css['text-gray-600'])}>Logged in user</span>
+      <NavItem className="dropdown no-arrow">
+        <a className="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <span className="mr-2 d-none d-lg-inline text-gray-600">Logged in user</span>
         </a>
-        <div className={classNames(css['dropdown-menu'], css['dropdown-menu-right'], css['shadow'], css['animated--grow-in'])} aria-labelledby="accountDropdown">
-          <a className={css['dropdown-item']} href="#">Profile</a>
-          <div className={css['dropdown-divider']}></div>
-          <a className={css['dropdown-item']} href="#">Sign Out</a>
+        <div className="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="accountDropdown">
+          <a className="dropdown-item" href="#">Profile</a>
+          <div className="dropdown-divider"></div>
+          <a className="dropdown-item" href="#">Sign Out</a>
         </div>
       </NavItem>
     );
