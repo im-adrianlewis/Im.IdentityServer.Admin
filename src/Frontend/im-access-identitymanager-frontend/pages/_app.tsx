@@ -18,16 +18,17 @@ export interface IdentityManagerAppProps {
 }
 
 export class IdentityManagerApp extends App<IdentityManagerAppProps> {
-  static async getInitialProps(appContext: AppContext) {
-    let pageProps = {};
-    //let worker = new Worker();
 
-    if (appContext.Component.getInitialProps) {
-      pageProps = await appContext.Component.getInitialProps(appContext.ctx);
-    }
+  // static async getInitialProps(appContext: AppContext) {
+  //   let pageProps = {};
+  //   //let worker = new Worker();
 
-    return { pageProps };
-  }
+  //   if (appContext.Component.getInitialProps) {
+  //     pageProps = await appContext.Component.getInitialProps(appContext.ctx);
+  //   }
+
+  //   return { pageProps };
+  // }
 
   //public helmetContext = {};
 
