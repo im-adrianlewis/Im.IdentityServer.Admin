@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 
 namespace Im.Access.GraphPortal.Repositories
 {
-    public interface IOperationalStateRepository
+    public interface ICircuitBreakerPolicyRepository
     {
-        Task<IEnumerable<CircuitBreakerEntity>> GetCircuitBreakersAsync(
+        Task<IEnumerable<CircuitBreakerPolicyEntity>> GetCircuitBreakersAsync(
             ClaimsPrincipal user,
             string filter,
             CancellationToken cancellationToken);
 
-        Task<CircuitBreakerEntity> UpdateCircuitBreaker(
+        Task<CircuitBreakerPolicyEntity> UpdateCircuitBreaker(
             ClaimsPrincipal user,
             CircuitBreakerInput breaker,
             CancellationToken cancellationToken);

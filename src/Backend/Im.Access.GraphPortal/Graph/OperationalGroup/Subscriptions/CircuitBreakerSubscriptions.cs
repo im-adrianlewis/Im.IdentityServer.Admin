@@ -19,18 +19,18 @@ namespace Im.Access.GraphPortal.Graph.OperationalGroup.Subscriptions
                 new EventStreamFieldType
                 {
                     Name = "circuitBreakerChanged",
-                    Type = typeof(CircuitBreakerType),
-                    Resolver = new FuncFieldResolver<CircuitBreakerEntity>(ResolveCircuitBreaker),
-                    Subscriber = new EventStreamResolver<CircuitBreakerEntity>(Subscribe)
+                    Type = typeof(CircuitBreakerPolicyType),
+                    Resolver = new FuncFieldResolver<CircuitBreakerPolicyEntity>(ResolveCircuitBreaker),
+                    Subscriber = new EventStreamResolver<CircuitBreakerPolicyEntity>(Subscribe)
                 });
         }
 
-        private CircuitBreakerEntity ResolveCircuitBreaker(ResolveFieldContext context)
+        private CircuitBreakerPolicyEntity ResolveCircuitBreaker(ResolveFieldContext context)
         {
-            return context.Source as CircuitBreakerEntity;
+            return context.Source as CircuitBreakerPolicyEntity;
         }
 
-        private IObservable<CircuitBreakerEntity> Subscribe(ResolveEventStreamContext context)
+        private IObservable<CircuitBreakerPolicyEntity> Subscribe(ResolveEventStreamContext context)
         {
             return null;
         }

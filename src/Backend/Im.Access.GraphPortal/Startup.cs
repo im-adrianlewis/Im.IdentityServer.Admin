@@ -65,17 +65,21 @@ namespace Im.Access.GraphPortal
             services.AddScoped<OperationalQueryType>();
             services.AddScoped<OperationalMutationType>();
             services.AddScoped<OperationalSubscriptionType>();
-            services.AddScoped<CircuitBreakerType>();
-            services.AddScoped<CircuitBreakerInputType>();
-            services.AddScoped<CircuitBreakerInputStateEnum>();
+            services.AddScoped<CircuitBreakerPolicyType>();
+            services.AddScoped<CircuitBreakerPolicyInputType>();
             services.AddScoped<CircuitBreakerSubscriptions>();
-            
+            services.AddScoped<ChaosPolicyType>();
+            services.AddScoped<ChaosPolicyInputType>();
+
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IClientRepository, ClientRepository>();
-            services.AddScoped<IOperationalStateRepository, OperationalStateRepository>();
+            services.AddScoped<IChaosPolicyRepository, ChaosPolicyRepository>();
+            services.AddScoped<ICircuitBreakerPolicyRepository, CircuitBreakerPolicyRepository>();
 
             services.AddScoped<IUserStore, UserStore>();
             services.AddScoped<IClientStore, ClientStore>();
+            services.AddScoped<IChaosPolicyStore, ChaosPolicyStore>();
+            services.AddScoped<ICircuitBreakerPolicyStore, CircuitBreakerPolicyStore>();
 
             services.AddSingleton<IPolicyRegistryFactory, PolicyRegistryFactory>();
             services.AddSingleton<IReadOnlyPolicyRegistry<string>>(
@@ -91,6 +95,11 @@ namespace Im.Access.GraphPortal
                     options.UseSqlServer(Configuration["ConnectionStrings:Admin"]);
                 });
             services.AddDbContext<ConfigurationDbContext>(
+                options =>
+                {
+                    options.UseSqlServer(Configuration["ConnectionStrings:Admin"]);
+                });
+            services.AddDbContext<OperationDbContext>(
                 options =>
                 {
                     options.UseSqlServer(Configuration["ConnectionStrings:Admin"]);

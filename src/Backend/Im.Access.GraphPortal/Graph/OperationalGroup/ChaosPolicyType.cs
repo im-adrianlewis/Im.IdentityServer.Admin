@@ -3,12 +3,12 @@ using Im.Access.GraphPortal.Repositories;
 
 namespace Im.Access.GraphPortal.Graph.OperationalGroup
 {
-    public class CircuitBreakerType : ObjectGraphType<CircuitBreakerEntity>
+    public class ChaosPolicyType : ObjectGraphType<CircuitBreakerPolicyEntity>
     {
-        public CircuitBreakerType()
+        public ChaosPolicyType()
         {
-            Name = "CircuitBreaker";
-            Description = "Describes the state of a service circuit breaker";
+            Name = "ChaosPolicy";
+            Description = "Describes the state of a service chaos policy";
 
             Field(e => e.Name).Description("Circuit breaker name");
             Field(e => e.State).Description("State of the circuit breaker");

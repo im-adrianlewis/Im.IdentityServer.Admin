@@ -6,19 +6,19 @@ namespace Im.Access.GraphPortal.Graph.OperationalGroup.Mutations
 {
     public class OperationalMutationType : ObjectGraphType
     {
-        public OperationalMutationType(IOperationalStateRepository operationalStateRepository)
+        public OperationalMutationType(ICircuitBreakerPolicyRepository circuitBreakerPolicyRepository)
         {
-            FieldAsync<CircuitBreakerType>(
+            FieldAsync<CircuitBreakerPolicyType>(
                 "updateCircuitBreaker",
                 arguments: new QueryArguments(
-                    new QueryArgument<NonNullGraphType<CircuitBreakerInputType>>
+                    new QueryArgument<NonNullGraphType<CircuitBreakerPolicyInputType>>
                     {
                         Name = "circuitBreaker"
                     }),
                 resolve: async (context) =>
                 {
                     var breaker = context.GetArgument<CircuitBreakerInput>("circuitBreaker");
-                    return await operationalStateRepository.UpdateCircuitBreaker(
+                    return await circuitBreakerPolicyRepository.UpdateCircuitBreaker(
                         context.UserContext as ClaimsPrincipal,
                         breaker,
                         context.CancellationToken);

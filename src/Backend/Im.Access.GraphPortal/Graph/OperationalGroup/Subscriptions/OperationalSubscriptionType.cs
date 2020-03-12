@@ -6,9 +6,9 @@ namespace Im.Access.GraphPortal.Graph.OperationalGroup.Subscriptions
 {
     public class OperationalSubscriptionType : ObjectGraphType
     {
-        public OperationalSubscriptionType(IOperationalStateRepository operationalStateRepository)
+        public OperationalSubscriptionType(ICircuitBreakerPolicyRepository circuitBreakerPolicyRepository)
         {
-            Field<CircuitBreakerType>(
+            Field<CircuitBreakerPolicyType>(
                 "eventsCircuitBreaker",
                 resolve: (context) =>
                 {

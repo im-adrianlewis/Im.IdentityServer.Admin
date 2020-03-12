@@ -6,17 +6,17 @@ namespace Im.Access.GraphPortal.Graph.OperationalGroup.Queries
 {
     public class OperationalQueryType : ObjectGraphType
     {
-        public OperationalQueryType(IOperationalStateRepository operationalStateRepository)
+        public OperationalQueryType(ICircuitBreakerPolicyRepository circuitBreakerPolicyRepository)
         {
             Name = "Operations";
             Description = "Query operations scoped to service operations";
 
-            FieldAsync<ListGraphType<CircuitBreakerType>>(
+            FieldAsync<ListGraphType<CircuitBreakerPolicyType>>(
                 "CircuitBreakers",
                 "Gets the circuit breaker states for the service",
                 resolve: async (fieldContext) =>
                 {
-                    return await operationalStateRepository
+                    return await circuitBreakerPolicyRepository
                         .GetCircuitBreakersAsync(
                             fieldContext.UserContext as ClaimsPrincipal,
                             "",
