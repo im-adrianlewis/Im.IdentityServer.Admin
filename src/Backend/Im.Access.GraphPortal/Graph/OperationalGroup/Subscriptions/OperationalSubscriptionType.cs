@@ -10,14 +10,14 @@ namespace Im.Access.GraphPortal.Graph.OperationalGroup.Subscriptions
             ICircuitBreakerPolicyRepository circuitBreakerPolicyRepository,
             IChaosPolicyRepository chaosPolicyRepository)
         {
-            Field<CircuitBreakerPolicyType>(
+            Field<CircuitBreakerPolicySubscriptionType>(
                 "circuitBreakerPolicyEvents",
                 resolve: (context) =>
                 {
                     return new CircuitBreakerPolicySubscriptionType(circuitBreakerPolicyRepository);
                 });
 
-            Field<ChaosPolicyType>(
+            Field<ChaosPolicySubscriptionType>(
                 "chaosPolicyEvents",
                 resolve: (context) =>
                 {

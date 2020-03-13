@@ -11,11 +11,11 @@ namespace Im.Access.GraphPortal.Graph.OperationalGroup.Mutations
 
             Field(p => p.ServiceName);
             Field(p => p.PolicyKey);
-            Field(p => p.Enabled);
-            Field(p => p.FaultEnabled);
-            Field(p => p.FaultInjectionRate);
-            Field(p => p.LatencyEnabled);
-            Field(p => p.LatencyInjectionRate);
+            Field(p => p.Enabled, true);
+            Field(p => p.FaultEnabled, true);
+            Field(p => p.FaultInjectionRate, true);
+            Field(p => p.LatencyEnabled, true);
+            Field(p => p.LatencyInjectionRate, true);
         }
     }
 }
