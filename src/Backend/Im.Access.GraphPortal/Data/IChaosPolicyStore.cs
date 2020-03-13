@@ -12,6 +12,6 @@ namespace Im.Access.GraphPortal.Data
         Task<DbChaosPolicy> GetChaosPolicyAsync(
             Guid id, CancellationToken cancellationToken);
 
-        Task<IEnumerable<DbChaosPolicy>> GetChaosPoliciesChangedSinceAsync(DateTimeOffset changesSince, in CancellationToken cancellationToken);
+        Task<IEnumerable<DbChaosPolicy>> GetChaosPoliciesChangedSinceAsync(DateTimeOffset changesSince, CancellationToken cancellationToken);
     }
 }

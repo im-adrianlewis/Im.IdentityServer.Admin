@@ -14,6 +14,6 @@ namespace Im.Access.GraphPortal.Data
             Guid id, CancellationToken cancellationToken);
 
         Task<IEnumerable<DbCircuitBreakerPolicy>> GetCircuitBreakerPoliciesChangedSinceAsync(
-            DateTimeOffset changesSince, in CancellationToken cancellationToken);
+            DateTimeOffset changesSince, CancellationToken cancellationToken);
     }
 }

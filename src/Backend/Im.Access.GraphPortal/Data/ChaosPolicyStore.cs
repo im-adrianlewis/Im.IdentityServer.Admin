@@ -52,5 +52,21 @@ namespace Im.Access.GraphPortal.Data
                         .FirstOrDefaultAsync(cancellationToken);
                 });
         }
+
+        public async Task<IEnumerable<DbChaosPolicy>> GetChaosPoliciesChangedSinceAsync(DateTimeOffset changesSince, CancellationToken cancellationToken)
+        {
+            var policy = _policyRegistry["SqlConnection"] as AsyncPolicy;
+            // ReSharper disable once PossibleNullReferenceException
+            return await policy.ExecuteAsync(
+                async () =>
+                {
+                    // Build user query
+                    return await _context
+                        .ChaosPolicies
+                        .Where(p => p.LastUpdated >= changesSince)
+                        .ToListAsync(cancellationToken)
+                        .ConfigureAwait(false);
+                });
+        }
     }
 }

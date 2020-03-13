@@ -6,13 +6,22 @@ namespace Im.Access.GraphPortal.Graph.OperationalGroup.Subscriptions
 {
     public class OperationalSubscriptionType : ObjectGraphType
     {
-        public OperationalSubscriptionType(ICircuitBreakerPolicyRepository circuitBreakerPolicyRepository)
+        public OperationalSubscriptionType(
+            ICircuitBreakerPolicyRepository circuitBreakerPolicyRepository,
+            IChaosPolicyRepository chaosPolicyRepository)
         {
             Field<CircuitBreakerPolicyType>(
-                "eventsCircuitBreaker",
+                "circuitBreakerPolicyEvents",
                 resolve: (context) =>
                 {
-                    return new CircuitBreakerPolicySubscriptionType();
+                    return new CircuitBreakerPolicySubscriptionType(circuitBreakerPolicyRepository);
+                });
+
+            Field<ChaosPolicyType>(
+                "chaosPolicyEvents",
+                resolve: (context) =>
+                {
+                    return new ChaosPolicySubscriptionType(chaosPolicyRepository);
                 });
         }
     }
