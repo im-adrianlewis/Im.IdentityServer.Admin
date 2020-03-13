@@ -1,32 +1,17 @@
 ﻿using GraphQL.Types;
+using Im.Access.GraphPortal.Repositories;
 
 namespace Im.Access.GraphPortal.Graph.OperationalGroup.Mutations
 {
-    public class CircuitBreakerPolicyInputType : InputObjectGraphType
+    public class CircuitBreakerPolicyInputType : InputObjectGraphType<CircuitBreakerPolicyInput>
     {
         public CircuitBreakerPolicyInputType()
         {
             Name = "CircuitBreakerPolicyInput";
 
-            Field<NonNullGraphType<StringGraphType>>("serviceName");
-            Field<NonNullGraphType<StringGraphType>>("policyKey");
-            Field<NonNullGraphType<BooleanGraphType>>("isIsolated");
-        }
-    }
-
-    public class ChaosPolicyInputType : InputObjectGraphType
-    {
-        public ChaosPolicyInputType()
-        {
-            Name = "ChaosPolicyInput";
-
-            Field<NonNullGraphType<StringGraphType>>("serviceName");
-            Field<NonNullGraphType<StringGraphType>>("policyKey");
-            Field<BooleanGraphType>("enabled");
-            Field<BooleanGraphType>("faultEnabled");
-            Field<FloatGraphType>("faultInjectionRate");
-            Field<BooleanGraphType>("latencyEnabled");
-            Field<FloatGraphType>("latencyInjectionRate");
+            Field(p => p.ServiceName);
+            Field(p => p.PolicyKey);
+            Field(p => p.IsIsolated);
         }
     }
 }

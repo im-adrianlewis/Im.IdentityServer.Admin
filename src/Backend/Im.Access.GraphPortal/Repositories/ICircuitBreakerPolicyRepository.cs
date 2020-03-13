@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,14 +8,18 @@ namespace Im.Access.GraphPortal.Repositories
 {
     public interface ICircuitBreakerPolicyRepository
     {
-        Task<IEnumerable<CircuitBreakerPolicyEntity>> GetCircuitBreakersAsync(
+        Task<IEnumerable<CircuitBreakerPolicyEntity>> GetAllAsync(
             ClaimsPrincipal user,
             string filter,
             CancellationToken cancellationToken);
 
-        Task<CircuitBreakerPolicyEntity> UpdateCircuitBreaker(
+        Task<CircuitBreakerPolicyEntity> UpdateAsync(
             ClaimsPrincipal user,
-            CircuitBreakerInput breaker,
+            CircuitBreakerPolicyInput circuitBreakerPolicy,
+            CancellationToken cancellationToken);
+
+        IObservable<CircuitBreakerPolicyEntity> Subscribe(
+            ClaimsPrincipal user,
             CancellationToken cancellationToken);
     }
 }

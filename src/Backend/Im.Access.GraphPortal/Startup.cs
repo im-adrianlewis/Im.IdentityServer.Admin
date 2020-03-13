@@ -67,9 +67,10 @@ namespace Im.Access.GraphPortal
             services.AddScoped<OperationalSubscriptionType>();
             services.AddScoped<CircuitBreakerPolicyType>();
             services.AddScoped<CircuitBreakerPolicyInputType>();
-            services.AddScoped<CircuitBreakerSubscriptions>();
+            services.AddScoped<CircuitBreakerPolicySubscriptionType>();
             services.AddScoped<ChaosPolicyType>();
             services.AddScoped<ChaosPolicyInputType>();
+            services.AddScoped<ChaosPolicySubscriptionType>();
 
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IClientRepository, ClientRepository>();

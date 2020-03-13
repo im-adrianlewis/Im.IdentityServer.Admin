@@ -12,7 +12,7 @@ namespace Im.Access.GraphPortal.Graph.OperationalGroup.Subscriptions
                 "eventsCircuitBreaker",
                 resolve: (context) =>
                 {
-                    return new CircuitBreakerSubscriptions();
+                    return new CircuitBreakerPolicySubscriptionType();
                 });
         }
     }

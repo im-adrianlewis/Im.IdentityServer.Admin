@@ -6,21 +6,39 @@ namespace Im.Access.GraphPortal.Graph.OperationalGroup.Mutations
 {
     public class OperationalMutationType : ObjectGraphType
     {
-        public OperationalMutationType(ICircuitBreakerPolicyRepository circuitBreakerPolicyRepository)
+        public OperationalMutationType(
+            ICircuitBreakerPolicyRepository circuitBreakerPolicyRepository,
+            IChaosPolicyRepository chaosPolicyRepository)
         {
             FieldAsync<CircuitBreakerPolicyType>(
-                "updateCircuitBreaker",
+                "updateCircuitBreakerPolicy",
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<CircuitBreakerPolicyInputType>>
                     {
-                        Name = "circuitBreaker"
+                        Name = "circuitBreakerPolicy"
                     }),
                 resolve: async (context) =>
                 {
-                    var breaker = context.GetArgument<CircuitBreakerInput>("circuitBreaker");
-                    return await circuitBreakerPolicyRepository.UpdateCircuitBreaker(
+                    var circuitBreakerPolicy = context.GetArgument<CircuitBreakerPolicyInput>("circuitBreakerPolicy");
+                    return await circuitBreakerPolicyRepository.UpdateAsync(
                         context.UserContext as ClaimsPrincipal,
-                        breaker,
+                        circuitBreakerPolicy,
+                        context.CancellationToken);
+                });
+
+            FieldAsync<ChaosPolicyType>(
+                "updateChaosPolicy",
+                arguments: new QueryArguments(
+                    new QueryArgument<NonNullGraphType<ChaosPolicyInputType>>
+                    {
+                        Name = "chaosPolicy"
+                    }),
+                resolve: async (context) =>
+                {
+                    var chaosPolicy = context.GetArgument<ChaosPolicyInput>("chaosPolicy");
+                    return await chaosPolicyRepository.UpdateAsync(
+                        context.UserContext as ClaimsPrincipal,
+                        chaosPolicy,
                         context.CancellationToken);
                 });
         }

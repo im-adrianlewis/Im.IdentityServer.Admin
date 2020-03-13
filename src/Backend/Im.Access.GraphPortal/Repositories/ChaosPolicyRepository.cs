@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading;
@@ -10,13 +11,14 @@ namespace Im.Access.GraphPortal.Repositories
     public class ChaosPolicyRepository : IChaosPolicyRepository
     {
         private readonly IChaosPolicyStore _chaosPolicyStore;
+        private ChaosPolicySubscriptionManager _subscriptionManager;
 
         public ChaosPolicyRepository(IChaosPolicyStore chaosPolicyStore)
         {
             _chaosPolicyStore = chaosPolicyStore;
         }
 
-        public async Task<IEnumerable<ChaosPolicyEntity>> GetChaosPoliciesAsync(ClaimsPrincipal user, string filter, CancellationToken cancellationToken)
+        public async Task<IEnumerable<ChaosPolicyEntity>> GetAllAsync(ClaimsPrincipal user, string filter, CancellationToken cancellationToken)
         {
             var rawPolicies = await _chaosPolicyStore
                 .GetChaosPoliciesAsync(cancellationToken)
@@ -39,9 +41,24 @@ namespace Im.Access.GraphPortal.Repositories
                     });
         }
 
-        //public Task<CircuitBreakerEntity> UpdateCircuitBreaker(ClaimsPrincipal user, CircuitBreakerInput breaker, CancellationToken cancellationToken)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public Task<ChaosPolicyEntity> UpdateAsync(
+            ClaimsPrincipal contextUserContext,
+            ChaosPolicyInput chaosPolicy,
+            CancellationToken contextCancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IObservable<ChaosPolicyEntity> Subscribe(
+            ClaimsPrincipal user, CancellationToken cancellationToken)
+        {
+            if (_subscriptionManager == null)
+            {
+                _subscriptionManager = new ChaosPolicySubscriptionManager(
+                    _chaosPolicyStore, CancellationToken.None);
+            }
+
+            return _subscriptionManager;
+        }
     }
 }
