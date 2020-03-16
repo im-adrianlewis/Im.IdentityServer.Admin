@@ -13,6 +13,11 @@ export class MainNav extends React.Component {
           </Link>
         </NavItem>
         <NavItem>
+          <Link href="/CircuitBreakerPolicies">
+            <NavLink href="/CircuitBreakerPolicies">Circuit Breaker Policies</NavLink>
+          </Link>
+        </NavItem>
+        <NavItem>
           <Link href="/SSR">
             <NavLink href="/SSR">SSR</NavLink>
           </Link>

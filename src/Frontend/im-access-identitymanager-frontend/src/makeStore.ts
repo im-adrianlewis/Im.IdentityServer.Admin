@@ -29,10 +29,10 @@ export default function makeStore(
       initialising: false,
       skipped: false
     },
-    conversation: {
+    userQuery: {
       loading: false
     },
-    userQuery: {
+    circuitBreakerPolicies: {
       loading: false
     }
   },

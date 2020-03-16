@@ -4,7 +4,7 @@ import { MainMenu } from './MainMenu';
 
 export const Header: React.FunctionComponent = _ =>
   <header>
-    <Container className={'topbar'}>
+    <Container>
       <MainMenu />
     </Container>
   </header>

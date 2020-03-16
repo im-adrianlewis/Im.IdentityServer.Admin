@@ -1,0 +1,12 @@
+subscription {
+  operations {
+    circuitBreakerPolicyEvents {
+      circuitBreakerPolicyChanged {
+        service
+        policyKey
+        isIsolated
+        lastUpdated
+      }
+    }
+  }
+}

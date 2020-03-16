@@ -14,21 +14,21 @@ import { activeBrandSaga } from './active-brand/sagas';
 import { ActiveBrandState } from './active-brand/types';
 import { ActiveBrandReducer } from './active-brand/reducer';
 
-import { conversationSaga } from './conversation/sagas';
-import { ConversationState } from './conversation/types';
-import { ConversationReducer } from './conversation/reducer';
-
 import { userQuerySaga } from './user-query/sagas';
 import { UserQueryState } from './user-query/types';
 import { UserQueryReducer } from './user-query/reducer';
+
+import { circuitBreakerPolicySaga } from './circuit-breaker-policies/sagas';
+import { CircuitBreakerPolicyState } from './circuit-breaker-policies/types';
+import { CircuitBreakerPolicyReducer } from './circuit-breaker-policies/reducer';
 
 export interface IApplicationState {
   //layout: LayoutState;
   route: RouterState;
   activeBrand: ActiveBrandState;
   analtyics: AnalyticsState;
-  conversation: ConversationState;
   userQuery: UserQueryState;
+  circuitBreakerPolicies: CircuitBreakerPolicyState;
 }
 
 export const rootReducer = combineReducers<IApplicationState>({
@@ -36,15 +36,15 @@ export const rootReducer = combineReducers<IApplicationState>({
   route: routerReducer,
   activeBrand: ActiveBrandReducer,
   analtyics: AnalyticsReducer,
-  conversation: ConversationReducer,
-  userQuery: UserQueryReducer
+  userQuery: UserQueryReducer,
+  circuitBreakerPolicies: CircuitBreakerPolicyReducer
 });
 
 export function* rootSaga() {
   yield all([
     fork(activeBrandSaga),
     fork(analyticsSaga),
-    fork(conversationSaga),
-    fork(userQuerySaga)
+    fork(userQuerySaga),
+    fork(circuitBreakerPolicySaga)
   ]);
 }
