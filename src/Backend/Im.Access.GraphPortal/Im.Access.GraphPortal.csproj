@@ -29,7 +29,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="5.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="5.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.1.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="5.1.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.4.0" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.11.0" />
   </ItemGroup>
   <ItemGroup>
